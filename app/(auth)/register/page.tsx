@@ -20,35 +20,26 @@ export default function RegisterPage() {
 
     const supabase = createClient();
 
-    // 1. Create the auth user
+    // Create the auth user; full_name/phone go into user metadata,
+    // and a database trigger (on_auth_user_created) creates the matching
+    // profiles row server-side — no client-side insert needed anymore.
     const { data, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
-    });
-
-    if (signUpError) {
-      setLoading(false);
-      return setError(signUpError.message);
-    }
-
-    const user = data.user;
-    if (!user) {
-      setLoading(false);
-      return setError("Something went wrong creating your account. Please try again.");
-    }
-
-    // 2. Create the matching profile row
-    const { error: profileError } = await supabase.from("profiles").insert({
-      id: user.id,
-      full_name: fullName,
-      phone,
-      role: "customer",
+      options: {
+        data: { full_name: fullName, phone },
+      },
     });
 
     setLoading(false);
 
-    if (profileError) {
-      setError(profileError.message);
+    if (signUpError) {
+      setError(signUpError.message);
+      return;
+    }
+
+    if (!data.user) {
+      setError("Something went wrong creating your account. Please try again.");
       return;
     }
 
