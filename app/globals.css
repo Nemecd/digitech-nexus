@@ -1,0 +1,38 @@
+@import "tailwindcss";
+
+@theme {
+  --color-cream: #FAF8F3;
+  --color-navy: #15417E;
+  --color-navy-light: #1C50A0;
+  --color-gold: #D98C1F;
+  --color-ink: #1C2333;
+  --color-slate: #4B5468;
+  --color-line: #E7E4DC;
+
+  --font-display: var(--font-fraunces);
+  --font-body: var(--font-inter);
+  --font-mono: var(--font-plex-mono);
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(24px, -32px) scale(1.06); }
+}
+@keyframes float-slower {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-30px, 24px) scale(1.08); }
+}
+@keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes spin-slower { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
+@keyframes pulse-node {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.5); }
+}
+@keyframes draw-line { from { stroke-dashoffset: 900; } to { stroke-dashoffset: 0; } }
+
+.animate-float-slow { animation: float-slow 13s ease-in-out infinite; }
+.animate-float-slower { animation: float-slower 17s ease-in-out infinite; }
+.animate-spin-slow { animation: spin-slow 40s linear infinite; transform-box: fill-box; transform-origin: center; }
+.animate-spin-slower { animation: spin-slower 60s linear infinite; transform-box: fill-box; transform-origin: center; }
+.animate-pulse-node { animation: pulse-node 3s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.animate-draw { animation: draw-line 2.5s ease-out forwards; }
