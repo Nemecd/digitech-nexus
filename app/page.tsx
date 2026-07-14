@@ -3,11 +3,11 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import StatsPanel from "@/components/StatsPanel";
 import Reveal from "@/components/Reveal";
-import AnimatedBlobs from "@/components/AnimatedBlobs";
 import HeroGraphic from "@/components/HeroGraphic";
 import {
   Fingerprint, Building2, GraduationCap, BookOpen, MonitorPlay, Users,
   ShieldCheck, Handshake, Wallet, Zap, Target, ArrowRight, Plane,
+  Star, Phone, Mail, MessageCircle,
 } from "lucide-react";
 
 const services = [
@@ -28,6 +28,12 @@ const whyChoose = [
   { icon: Target, title: "Focused On Results", desc: "We are committed to your growth and success." },
 ];
 
+const testimonials = [
+  { name: "Chinedu O.", role: "Business Owner, Enugu", quote: "My CAC registration was handled from start to finish in a few days. No stress, no back and forth — I just uploaded my documents and tracked everything on my dashboard." },
+  { name: "Amara N.", role: "NIN Modification Client", quote: "I'd been putting off my NIN modification for months because of how stressful the process usually is. Digitech Nexus made it painless." },
+  { name: "David K.", role: "DN Academy Graduate", quote: "The digital skills training gave me practical, usable skills — not just theory. I'd recommend the courses to anyone serious about growth." },
+];
+
 const stats = [
   { value: 15, suffix: "+", label: "Countries" },
   { value: 500, suffix: "+", label: "Happy Clients" },
@@ -37,14 +43,19 @@ const stats = [
 
 const destinations = ["🇬🇧 United Kingdom", "🇨🇦 Canada", "🇺🇸 United States", "🇦🇺 Australia", "🇪🇺 Europe", "🇮🇪 Ireland", "🇳🇿 New Zealand"];
 
+const supportChannels = [
+  { icon: Phone, title: "Call / WhatsApp", detail: "07039067561, 07013364339", href: "tel:07039067561" },
+  { icon: Mail, title: "Email", detail: "info@digitechnexushub.com", href: "mailto:info@digitechnexushub.com" },
+  { icon: MessageCircle, title: "Live Chat", detail: "Chat with us on WhatsApp", href: "https://wa.me/2347039067561" },
+];
+
 export default function HomePage() {
   return (
     <>
       <Navbar />
 
-      {/* HERO — navy, animated SVG graphic + floating blobs */}
+      {/* HERO — navy, animated SVG graphic */}
       <section className="relative overflow-hidden bg-navy">
-        
         <HeroGraphic />
         <div className="absolute inset-0 bg-gradient-to-r from-navy via-navy/70 to-transparent" />
 
@@ -76,7 +87,6 @@ export default function HomePage() {
 
       {/* CORE SERVICES — white */}
       <section className="relative bg-white">
-        
         <div className="relative z-10 max-w-7xl mx-auto px-6 py-20">
           <div className="text-center mb-12">
             <span className="inline-block rounded-full bg-gold/10 text-gold text-xs font-semibold px-4 py-1.5 tracking-wide">
@@ -114,7 +124,6 @@ export default function HomePage() {
 
       {/* WHY CHOOSE US — navy */}
       <section className="relative bg-navy border-y border-gold/10">
-        
         <div className="relative z-10 max-w-7xl mx-auto px-6 py-20">
           <div className="text-center mb-12">
             <span className="inline-block rounded-full bg-gold/10 text-gold text-xs font-semibold px-4 py-1.5 tracking-wide">
@@ -137,18 +146,46 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* STUDY DESTINATIONS — white */}
+      {/* TESTIMONIALS — white */}
       <section className="relative bg-white">
-        
+        <div className="relative z-10 max-w-7xl mx-auto px-6 py-20">
+          <div className="text-center mb-12">
+            <span className="inline-block rounded-full bg-gold/10 text-gold text-xs font-semibold px-4 py-1.5 tracking-wide">
+              WHAT OUR CLIENTS SAY
+            </span>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            {testimonials.map((t, i) => (
+              <Reveal key={t.name} delay={i * 100}>
+                <div className="rounded-2xl bg-white border border-line p-6 shadow-sm h-full flex flex-col">
+                  <div className="flex gap-0.5 mb-4">
+                    {Array.from({ length: 5 }).map((_, s) => (
+                      <Star key={s} size={14} className="fill-gold text-gold" />
+                    ))}
+                  </div>
+                  <p className="text-sm text-slate flex-1">&ldquo;{t.quote}&rdquo;</p>
+                  <div className="mt-5 pt-4 border-t border-line">
+                    <p className="text-sm font-semibold text-navy">{t.name}</p>
+                    <p className="text-xs text-slate">{t.role}</p>
+                  </div>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* STUDY DESTINATIONS — navy */}
+      <section className="relative bg-navy border-y border-gold/10">
         <div className="relative z-10 max-w-7xl mx-auto px-6 py-20">
           <Reveal>
-            <div className="rounded-3xl bg-navy p-10 text-center">
+            <div className="rounded-3xl bg-white/5 border border-white/10 p-10 text-center">
               <div className="flex items-center justify-center gap-2 text-gold text-xs font-semibold tracking-wide mb-6">
                 <Plane size={14} /> STUDY DESTINATIONS
               </div>
               <div className="flex flex-wrap justify-center gap-x-8 gap-y-4 text-sm text-cream/85">
                 {destinations.map((d) => (
-                  <span key={d}>{d}</span>
+                  <span key={d} className="hover:text-gold transition-colors cursor-default">{d}</span>
                 ))}
               </div>
             </div>
@@ -156,9 +193,37 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* SUPPORT — white */}
+      <section className="relative bg-white">
+        <div className="relative z-10 max-w-7xl mx-auto px-6 py-20">
+          <div className="text-center mb-12">
+            <span className="inline-block rounded-full bg-gold/10 text-gold text-xs font-semibold px-4 py-1.5 tracking-wide">
+              NEED HELP?
+            </span>
+            <h2 className="font-display text-3xl font-semibold text-navy mt-4">
+              We&apos;re here whenever you need us
+            </h2>
+          </div>
+          <div className="grid sm:grid-cols-3 gap-6 max-w-3xl mx-auto">
+            {supportChannels.map((c) => (
+              <a
+                key={c.title}
+                href={c.href}
+                className="rounded-2xl bg-white border border-line p-6 text-center shadow-sm hover:border-gold/50 hover:shadow-md transition-all"
+              >
+                <div className="w-11 h-11 rounded-full bg-gold/10 text-gold flex items-center justify-center mx-auto mb-4">
+                  <c.icon size={18} />
+                </div>
+                <h4 className="font-display font-semibold text-navy text-sm mb-1">{c.title}</h4>
+                <p className="text-xs text-slate">{c.detail}</p>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* CTA — navy, glass card */}
       <section className="relative bg-navy">
-        
         <div className="relative z-10 max-w-7xl mx-auto px-6 py-24">
           <Reveal>
             <div className="rounded-3xl bg-white/8 backdrop-blur-md border border-white/15 p-12 text-center">
