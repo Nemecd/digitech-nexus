@@ -3,6 +3,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
+import { useCart } from "@/lib/cart-context";
+import { ShoppingCart } from "lucide-react";
 
 const links = [
   { href: "/services/nin", label: "NIN Services" },
@@ -15,12 +17,20 @@ const links = [
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const { count } = useCart();
 
   return (
     <header className="sticky top-0 z-40 bg-navy border-b border-gold/20">
       <nav className="max-w-7xl mx-auto flex items-center justify-between px-6 py-3">
         <Link href="/" className="flex items-center gap-2">
-          <Image src="/logo.png" alt="Digitech Nexus" width={40} height={40} style={{ width: "auto", height: "auto" }}className="object-contain" />
+          <Image
+            src="/logo.png"
+            alt="Digitech Nexus"
+            width={40}
+            height={40}
+            style={{ width: "auto", height: "auto" }}
+            className="object-contain"
+          />
           <span className="font-display font-semibold text-lg text-white">
             Digitech <span className="text-gold">Nexus</span>
           </span>
@@ -37,9 +47,22 @@ export default function Navbar() {
             </Link>
           ))}
         </div>
-
+        <Link
+          href="/cart"
+          className="relative text-white/80 hover:text-gold transition-colors"
+        >
+          <ShoppingCart size={19} />
+          {count > 0 && (
+            <span className="absolute -top-2 -right-2 bg-gold text-navy text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+              {count}
+            </span>
+          )}
+        </Link>
         <div className="hidden lg:flex items-center gap-3">
-          <Link href="/login" className="text-sm text-white/80 hover:text-gold transition-colors">
+          <Link
+            href="/login"
+            className="text-sm text-white/80 hover:text-gold transition-colors"
+          >
             Log in
           </Link>
           <Link

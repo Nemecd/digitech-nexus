@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { fraunces, inter, plexMono } from "./fonts";
-import "./globals.css";
 import AnimatedBlobs from "@/components/AnimatedBlobs";
+import { CartProvider } from "@/lib/cart-context";
+import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Digitech Nexus",
@@ -12,11 +13,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${fraunces.variable} ${inter.variable} ${plexMono.variable}`}>
       <body suppressHydrationWarning className="font-body bg-cream text-ink">
-        
         <AnimatedBlobs />
-  <div className="relative z-10">{children}</div>
+        <div className="relative z-10">
+          <CartProvider>{children}</CartProvider>
+        </div>
       </body>
     </html>
   );
 }
-
