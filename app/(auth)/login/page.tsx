@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
@@ -16,17 +17,33 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
     const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      setLoading(false);
+      return setError(error.message);
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", data.user.id)
+      .single();
+
     setLoading(false);
-    if (error) return setError(error.message);
-    router.push("/dashboard");
+    toast.success("Success! Taking you to your dashboard…");
+    router.push(profile?.role === "admin" ? "/admin" : "/dashboard");
     router.refresh();
   }
-
   return (
     <div>
       <h2 className="font-display text-2xl font-bold">Welcome back</h2>
-      <p className="text-muted text-sm mt-1 mb-8">Log in to continue to your dashboard.</p>
+      <p className="text-muted text-sm mt-1 mb-8">
+        Log in to continue to your dashboard.
+      </p>
 
       <form onSubmit={handleLogin} className="space-y-4">
         <div>
@@ -63,7 +80,9 @@ export default function LoginPage() {
 
       <p className="text-sm text-muted mt-6">
         Don't have an account?{" "}
-        <Link href="/register" className="text-gold hover:underline">Create one</Link>
+        <Link href="/register" className="text-gold hover:underline">
+          Create one
+        </Link>
       </p>
     </div>
   );

@@ -9,37 +9,45 @@ import { CheckCircle2, Loader2 } from "lucide-react";
 
 export default function CheckoutSuccessClient() {
   const params = useSearchParams();
-  const reference = params.get("reference");
+  const transactionId = params.get("transaction_id");
+  const status = params.get("status");
   const { clearCart } = useCart();
-  const [status, setStatus] = useState<"loading" | "success" | "failed">("loading");
+  const [pageStatus, setPageStatus] = useState<"loading" | "success" | "failed">("loading");
 
   useEffect(() => {
-    if (!reference) return;
-    fetch(`/api/payment/verify?reference=${reference}`)
+    if (status === "cancelled") {
+      setPageStatus("failed");
+      return;
+    }
+    if (!transactionId) {
+      setPageStatus("failed");
+      return;
+    }
+    fetch(`/api/payment/verify?transaction_id=${transactionId}`)
       .then((res) => res.json())
       .then((data) => {
-        if (data.status && data.data.status === "success") {
-          setStatus("success");
+        if (data.status === "success" && data.data?.status === "successful") {
+          setPageStatus("success");
           clearCart();
         } else {
-          setStatus("failed");
+          setPageStatus("failed");
         }
       })
-      .catch(() => setStatus("failed"));
-  }, [reference]);
+      .catch(() => setPageStatus("failed"));
+  }, [transactionId, status]);
 
   return (
     <>
       <Navbar />
       <section className="bg-white min-h-[60vh] flex items-center justify-center">
         <div className="max-w-md mx-auto px-6 py-24 text-center">
-          {status === "loading" && (
+          {pageStatus === "loading" && (
             <>
               <Loader2 className="animate-spin mx-auto text-gold mb-4" size={32} />
               <p className="text-slate">Confirming your payment…</p>
             </>
           )}
-          {status === "success" && (
+          {pageStatus === "success" && (
             <>
               <CheckCircle2 className="mx-auto text-gold mb-4" size={40} />
               <h1 className="font-display text-2xl font-semibold text-navy mb-2">Payment successful!</h1>
@@ -49,7 +57,7 @@ export default function CheckoutSuccessClient() {
               </Link>
             </>
           )}
-          {status === "failed" && (
+          {pageStatus === "failed" && (
             <>
               <p className="text-red-500 mb-4">We couldn&apos;t confirm your payment.</p>
               <Link href="/cart" className="text-gold hover:underline text-sm font-semibold">Return to cart</Link>
