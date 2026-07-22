@@ -1,7 +1,8 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
-import { Menu, X, LayoutDashboard, Package, Wallet, Bell, User, ShieldCheck } from "lucide-react";
+import { Menu, X, LayoutDashboard, Package, Wallet, Bell, User, ShieldCheck, Users } from "lucide-react";
+import SignOutButton from "@/components/SignOutButton";
 
 const links = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
@@ -9,6 +10,7 @@ const links = [
   { href: "/dashboard/wallet", label: "Wallet", icon: Wallet },
   { href: "/dashboard/notifications", label: "Notifications", icon: Bell },
   { href: "/dashboard/profile", label: "Profile", icon: User },
+  { href: "/dashboard/affiliate", label: "Affiliate", icon: Users }
 ];
 
 export default function DashboardMobileNav({
@@ -66,6 +68,7 @@ export default function DashboardMobileNav({
                 <ShieldCheck size={18} /> Admin Panel
               </Link>
             )}
+            <SignOutButton className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm text-cream/85 hover:bg-white/10 hover:text-gold transition-colors mt-2" />
           </nav>
         </div>
       )}

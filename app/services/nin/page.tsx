@@ -1,5 +1,6 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import AddToCartButton from "@/components/AddToCartButton";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { Fingerprint, FileCheck, UploadCloud, Bell, ArrowRight } from "lucide-react";
@@ -10,7 +11,7 @@ export default async function NinServicesPage() {
   const supabase = await createClient();
   const { data: services } = await supabase
     .from("products")
-    .select("id, title, description, price")
+    .select("id, title, description, price, thumbnail_url")
     .eq("type", "nin_service")
     .eq("status", "published")
     .order("created_at", { ascending: true });
@@ -53,6 +54,13 @@ export default async function NinServicesPage() {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {services.map((s) => (
                 <div key={s.id} className="rounded-2xl bg-white border border-line p-6 shadow-sm hover:border-gold/50 hover:shadow-md transition-all flex flex-col">
+                  {s.thumbnail_url ? (
+                    <img src={s.thumbnail_url} alt={s.title} className="w-full h-36 object-cover rounded-xl mb-4" />
+                  ) : (
+                    <div className="w-full h-36 rounded-xl bg-cream flex items-center justify-center mb-4">
+                      <Fingerprint size={28} className="text-slate/40" />
+                    </div>
+                  )}
                   <h3 className="font-display font-semibold text-navy mb-2">{s.title}</h3>
                   <p className="text-sm text-slate flex-1">{s.description}</p>
                   <div className="flex items-center justify-between mt-6">
@@ -63,7 +71,7 @@ export default async function NinServicesPage() {
                       href="/register"
                       className="rounded-full bg-navy px-4 py-2 text-xs font-semibold text-cream hover:bg-gold hover:text-navy transition-colors inline-flex items-center gap-1"
                     >
-                      Request <ArrowRight size={14} />
+                      <AddToCartButton id={s.id} title={s.title} price={Number(s.price)} type="nin_service" />
                     </Link>
                   </div>
                 </div>

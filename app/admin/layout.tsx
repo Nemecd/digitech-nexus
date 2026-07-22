@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
-import { LayoutDashboard, Package, ShoppingCart, Users } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, Users, DollarSign, Send, FileText } from "lucide-react";
+import SignOutButton from "@/components/SignOutButton";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -22,6 +23,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     { href: "/admin/products", label: "Products", icon: Package },
     { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
     { href: "/admin/users", label: "Users", icon: Users },
+    { href: "/admin/commissions", label: "Commissions", icon: DollarSign },
+{ href: "/admin/withdrawals", label: "Withdrawals", icon: Send },
+{ href: "/admin/service-requests", label: "Service Requests", icon: FileText },
   ];
 
   return (
@@ -40,6 +44,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               <l.icon size={17} /> {l.label}
             </Link>
           ))}
+          <SignOutButton />
         </nav>
       </aside>
       <main className="flex-1 p-8">{children}</main>

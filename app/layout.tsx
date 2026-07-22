@@ -4,6 +4,7 @@ import AnimatedBlobs from "@/components/AnimatedBlobs";
 import { CartProvider } from "@/lib/cart-context";
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
+import ReferralCapture from "@/components/ReferralCapture";
 
 export const metadata: Metadata = {
   title: "Digitech Nexus",
@@ -38,6 +39,7 @@ export default function RootLayout({
             },
           }}
         />
+        <ReferralCapture />
       </body>
     </html>
   );

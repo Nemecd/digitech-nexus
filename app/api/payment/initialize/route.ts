@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { cookies } from "next/headers";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function POST(req: Request) {
   const { items, email } = await req.json();
@@ -12,10 +14,25 @@ export async function POST(req: Request) {
   if (!user) return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
 
   const total = items.reduce((sum: number, i: any) => sum + i.price * i.quantity, 0);
+const cookieStore = await cookies();
+const refCode = cookieStore.get("ref_code")?.value;
 
+let affiliateId: string | null = null;
+if (refCode) {
+  const admin = createAdminClient();
+  const { data: link } = await admin
+    .from("affiliate_links")
+    .select("affiliate_id, affiliates(user_id, status)")
+    .eq("code", refCode)
+    .single();
+
+  if (link && (link.affiliates as any)?.status === "active" && (link.affiliates as any)?.user_id !== user.id) {
+    affiliateId = link.affiliate_id; // block self-referral
+  }
+}
   const { data: order, error: orderError } = await supabase
     .from("orders")
-    .insert({ customer_id: user.id, total_amount: total, payment_status: "pending", payment_method: "card" })
+    .insert({ customer_id: user.id, affiliate_id: affiliateId, total_amount: total, payment_status: "pending", payment_method: "card" })
     .select()
     .single();
 

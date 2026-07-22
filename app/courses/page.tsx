@@ -11,7 +11,7 @@ export default async function CoursesPage() {
   const supabase = await createClient();
   const { data: courses } = await supabase
     .from("products")
-    .select("id, title, description, price, metadata")
+    .select("id, title, description, price,thumbnail_url")
     .eq("type", "course")
     .eq("status", "published")
     .order("created_at", { ascending: true });
@@ -51,6 +51,17 @@ export default async function CoursesPage() {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {courses.map((c) => (
                 <div key={c.id} className="rounded-2xl bg-white border border-line p-6 shadow-sm hover:border-gold/50 hover:shadow-md transition-all flex flex-col">
+                  {c.thumbnail_url ? (
+                    <img
+                      src={c.thumbnail_url}
+                      alt={c.title}
+                      className="w-full h-36 object-cover rounded-xl mb-4"
+                    />
+                  ) : (
+                    <div className="w-full h-36 rounded-xl bg-cream flex items-center justify-center mb-4">
+                      <MonitorPlay size={28} className="text-slate/40" />
+                    </div>
+                  )}
                   <h3 className="font-display font-semibold text-navy mb-2">{c.title}</h3>
                   <p className="text-sm text-slate flex-1">{c.description}</p>
                   <div className="flex items-center justify-between mt-6">

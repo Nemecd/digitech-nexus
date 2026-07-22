@@ -36,6 +36,17 @@ export default async function MyProductsPage() {
               {(item.status === "pending" || item.status === "in_review") && (
                 <span className="text-xs px-3 py-1.5 rounded-full bg-gold/10 text-gold font-semibold">Awaiting Details</span>
               )}
+              {(item.products?.type === "nin_service" || item.products?.type === "cac_service" || item.products?.type === "visa_service" || item.products?.type === "student_placement") && item.status === "pending" && (
+  <Link href={`/dashboard/service-requests/${item.id}`} className="rounded-full bg-gold text-navy px-4 py-2 text-xs font-semibold hover:bg-gold/90 transition-colors">
+    Complete Your Request
+  </Link>
+)}
+{item.status === "in_review" && (
+  <span className="text-xs px-3 py-1.5 rounded-full bg-cream text-slate font-semibold">Under Review</span>
+)}
+{item.status === "completed" && (
+  <span className="text-xs px-3 py-1.5 rounded-full bg-gold/10 text-gold font-semibold">Completed</span>
+)}
             </div>
           ))}
         </div>

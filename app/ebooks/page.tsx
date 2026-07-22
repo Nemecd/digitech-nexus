@@ -11,7 +11,7 @@ export default async function EbooksPage() {
   const supabase = await createClient();
   const { data: ebooks } = await supabase
     .from("products")
-    .select("id, title, description, price")
+    .select("id, title, description, price, thumbnail_url")
     .eq("type", "ebook")
     .eq("status", "published")
     .order("created_at", { ascending: true });
@@ -46,7 +46,14 @@ export default async function EbooksPage() {
                   <div className="w-10 h-10 rounded-full bg-gold/10 text-gold flex items-center justify-center mb-4">
                     <BookOpen size={18} />
                   </div>
-                  <h3 className="font-display font-semibold text-navy mb-2">{e.title}</h3>
+                  {e.thumbnail_url ? (
+                    <img src={e.thumbnail_url} alt={e.title} className="w-full h-36 object-cover rounded-xl mb-4" />
+                  ) : (
+                    <div className="w-full h-36 rounded-xl bg-cream flex items-center justify-center mb-4">
+                      <BookOpen size={28} className="text-slate/40" />
+                    </div>
+                  )}
+               <h3 className="font-display font-semibold text-navy mb-2">{e.title}</h3>
                   <p className="text-sm text-slate flex-1">{e.description}</p>
                   <div className="flex items-center justify-between mt-6">
                     <span className="font-display text-lg font-semibold text-gold">
