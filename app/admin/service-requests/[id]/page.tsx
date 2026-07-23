@@ -3,12 +3,14 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { updateRequestStatus } from "./actions";
 import { FileText } from "lucide-react";
 
-export default async function AdminServiceRequestDetailPage({ params }: { params: { id: string } }) {
+export default async function AdminServiceRequestDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+
   const supabase = await createClient();
   const { data: request } = await supabase
     .from("service_requests")
     .select("id, status, form_data, document_urls, admin_notes, created_at, products(title), profiles(full_name, phone)")
-    .eq("id", params.id)
+    .eq("id", id)
     .single();
 
   if (!request) return <p className="text-slate">Request not found.</p>;

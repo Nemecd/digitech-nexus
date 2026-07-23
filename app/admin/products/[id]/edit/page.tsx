@@ -1,16 +1,17 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-
+import EditProductForm from "./EditProductForm";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import EditProductForm from "./EditProductForm";
 
-export default async function EditProductPage({ params }: { params: { id: string } }) {
+export default async function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+
   const supabase = await createClient();
   const { data: product } = await supabase
     .from("products")
     .select("id, type, title, description, price, status, thumbnail_url, file_url")
-    .eq("id", params.id)
+    .eq("id", id)
     .single();
 
   if (!product) redirect("/admin/products");

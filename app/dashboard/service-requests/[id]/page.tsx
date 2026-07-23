@@ -1,7 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import ServiceRequestForm from "./ServiceRequestForm";
-export default async function ServiceRequestPage({ params }: { params: { id: string } }) {
+
+export default async function ServiceRequestPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
@@ -9,7 +12,7 @@ export default async function ServiceRequestPage({ params }: { params: { id: str
   const { data: userProduct } = await supabase
     .from("user_products")
     .select("id, order_id, status, products(id, title, type, price)")
-    .eq("id", params.id)
+    .eq("id", id)
     .eq("user_id", user.id)
     .single();
 

@@ -2,7 +2,9 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { PlayCircle, CheckCircle2 } from "lucide-react";
 
-export default async function CourseViewerPage({ params }: { params: { id: string } }) {
+export default async function CourseViewerPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
@@ -11,17 +13,17 @@ export default async function CourseViewerPage({ params }: { params: { id: strin
     .from("user_products")
     .select("id, progress")
     .eq("user_id", user.id)
-    .eq("product_id", params.id)
+    .eq("product_id", id)
     .eq("status", "active")
     .single();
 
   if (!ownership) redirect("/dashboard/products");
 
-  const { data: product } = await supabase.from("products").select("title").eq("id", params.id).single();
+  const { data: product } = await supabase.from("products").select("title").eq("id", id).single();
   const { data: lessons } = await supabase
     .from("course_lessons")
     .select("id, title, video_url, duration_minutes")
-    .eq("product_id", params.id)
+    .eq("product_id", id)
     .order("order_index", { ascending: true });
 
   const completed: string[] = (ownership.progress as any)?.completedLessons || [];

@@ -82,7 +82,7 @@ export default function CheckoutPage() {
             disabled={loading || !email}
             className="w-full rounded-full bg-navy text-cream py-3.5 text-sm font-semibold hover:bg-gold hover:text-navy transition-colors disabled:opacity-50"
           >
-            {loading ? "Redirecting to payment…" : `Pay ₦${total.toLocaleString()} with Paystack`}
+            {loading ? "Redirecting to payment…" : `Pay ₦${total.toLocaleString()} with Flutterwave`}
           </button>
         </div>
       </section>

@@ -3,13 +3,15 @@ import { addLesson, deleteLesson } from "./actions";
 import Link from "next/link";
 import { ArrowLeft, PlayCircle } from "lucide-react";
 
-export default async function ManageLessonsPage({ params }: { params: { id: string } }) {
+export default async function ManageLessonsPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+
   const supabase = await createClient();
-  const { data: product } = await supabase.from("products").select("title").eq("id", params.id).single();
+  const { data: product } = await supabase.from("products").select("title").eq("id", id).single();
   const { data: lessons } = await supabase
     .from("course_lessons")
     .select("id, title, video_url, duration_minutes, order_index")
-    .eq("product_id", params.id)
+    .eq("product_id", id)
     .order("order_index", { ascending: true });
 
   return (
@@ -20,7 +22,7 @@ export default async function ManageLessonsPage({ params }: { params: { id: stri
       <h1 className="font-display text-2xl font-semibold text-navy mb-8">Lessons — {product?.title}</h1>
 
       <form action={addLesson} className="rounded-2xl bg-white border border-line p-6 mb-8 grid md:grid-cols-5 gap-3 items-end">
-        <input type="hidden" name="productId" value={params.id} />
+        <input type="hidden" name="productId" value={id} />
         <div className="md:col-span-2">
           <label className="text-xs text-slate">Lesson Title</label>
           <input name="title" required className="mt-1 w-full rounded-lg border border-line px-3 py-2 text-sm" />
@@ -53,7 +55,7 @@ export default async function ManageLessonsPage({ params }: { params: { id: stri
               </div>
             </div>
             <form action={deleteLesson}>
-              <input type="hidden" name="productId" value={params.id} />
+              <input type="hidden" name="productId" value={id} />
               <input type="hidden" name="lessonId" value={l.id} />
               <button className="text-xs text-red-500 hover:underline">Delete</button>
             </form>
