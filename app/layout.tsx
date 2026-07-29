@@ -5,6 +5,7 @@ import { CartProvider } from "@/lib/cart-context";
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
 import ReferralCapture from "@/components/ReferralCapture";
+import Preloader from "@/components/Preloader";
 
 export const metadata: Metadata = {
   title: "Digitech Nexus",
@@ -22,6 +23,7 @@ export default function RootLayout({
       className={`${fraunces.variable} ${inter.variable} ${plexMono.variable}`}
     >
       <body suppressHydrationWarning className="font-body bg-cream text-ink">
+        <Preloader />
         <AnimatedBlobs />
         <div className="relative z-10">
           <CartProvider>{children}</CartProvider>
