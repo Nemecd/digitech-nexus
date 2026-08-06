@@ -1,6 +1,5 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import AddToCartButton from "@/components/AddToCartButton";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { GraduationCap, FileCheck, UploadCloud, Bell, ArrowRight, ShieldCheck, Plane, Award } from "lucide-react";
@@ -11,7 +10,7 @@ export default async function StudentPlacementPage() {
   const supabase = await createClient();
   const { data: services } = await supabase
     .from("products")
-    .select("id, title, description, price, thumbnail_url")
+    .select("id, title, description, price")
     .eq("type", "student_placement")
     .eq("status", "published")
     .order("created_at", { ascending: true });
@@ -44,10 +43,26 @@ export default async function StudentPlacementPage() {
           <p className="text-cream/70 text-lg mt-4 max-w-xl">
             A trusted education travel and student recruitment agency helping Nigerian and African students access quality international education — from choosing a university to relocating and settling in.
           </p>
+          <p className="text-cream/60 text-sm mt-3 max-w-xl">
+            Prefer to speak with us first? Book a consultation. Ready to apply directly through our partner network? Use ApplyBoard.
+          </p>
+
           <div className="flex flex-wrap gap-4 mt-8">
-            <Link href="/register" className="rounded-full bg-gold px-6 py-3 text-sm font-semibold text-navy hover:bg-gold/90 transition-colors inline-flex items-center gap-2">
+            <Link
+              href="/register"
+              className="rounded-full bg-gold px-6 py-3 text-sm font-semibold text-navy hover:bg-gold/90 transition-colors inline-flex items-center gap-2"
+            >
               Book a Free Consultation <ArrowRight size={16} />
             </Link>
+
+            <a
+              href="https://www.applyboard.com/partners/2054090/intake-form"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-full border border-cream/25 px-6 py-3 text-sm font-semibold text-cream hover:border-gold hover:text-gold transition-colors inline-flex items-center gap-2"
+            >
+              Apply via ApplyBoard <ArrowRight size={16} />
+            </a>
           </div>
         </div>
       </section>
@@ -88,13 +103,6 @@ export default async function StudentPlacementPage() {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {services.map((s) => (
                 <div key={s.id} className="rounded-2xl bg-white/5 border border-white/10 p-6 hover:border-gold/40 transition-colors flex flex-col">
-                  {s.thumbnail_url ? (
-                    <img src={s.thumbnail_url} alt={s.title} className="w-full h-36 object-cover rounded-xl mb-4" />
-                  ) : (
-                    <div className="w-full h-36 rounded-xl bg-cream flex items-center justify-center mb-4">
-                      <GraduationCap size={28} className="text-slate/40" />
-                    </div>
-                  )}
                   <h3 className="font-display font-semibold text-cream mb-2">{s.title}</h3>
                   <p className="text-sm text-cream/65 flex-1">{s.description}</p>
                   <div className="flex items-center justify-between mt-6">
@@ -105,7 +113,7 @@ export default async function StudentPlacementPage() {
                       href="/register"
                       className="rounded-full bg-gold px-4 py-2 text-xs font-semibold text-navy hover:bg-gold/90 transition-colors inline-flex items-center gap-1"
                     >
-                      <AddToCartButton id={s.id} title={s.title} price={Number(s.price)} type="nin_service" />
+                      Get Started <ArrowRight size={14} />
                     </Link>
                   </div>
                 </div>
@@ -165,9 +173,20 @@ export default async function StudentPlacementPage() {
             <p className="text-cream/70 mb-8 max-w-lg mx-auto">
               Create an account to book a free consultation and start your journey with DNT Edutravel.
             </p>
-            <Link href="/register" className="rounded-full bg-gold px-7 py-3 text-sm font-semibold text-navy inline-flex items-center gap-2 hover:bg-gold/90 transition-colors">
-              Book Free Consultation <ArrowRight size={16} />
-            </Link>
+
+            <div className="flex flex-wrap gap-4 justify-center">
+              <Link href="/register" className="rounded-full bg-gold px-7 py-3 text-sm font-semibold text-navy inline-flex items-center gap-2 hover:bg-gold/90 transition-colors">
+                Book Free Consultation <ArrowRight size={16} />
+              </Link>
+              <a
+                href="https://www.applyboard.com/partners/2054090/intake-form"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-full border border-cream/25 px-7 py-3 text-sm font-semibold text-cream hover:border-gold hover:text-gold transition-colors inline-flex items-center gap-2"
+              >
+                Apply via ApplyBoard <ArrowRight size={16} />
+              </a>
+            </div>
           </div>
         </div>
       </section>
