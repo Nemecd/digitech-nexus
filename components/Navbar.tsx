@@ -70,14 +70,13 @@ export default function Navbar() {
     <header className="sticky top-0 z-40 bg-navy border-b border-gold/20">
       <nav className="max-w-7xl mx-auto flex items-center justify-between px-6 py-3">
         <Link href="/" className="flex items-center gap-2">
-          <Image
-            src="/logo.png"
-            alt="Digitech Nexus"
-            width={40}
-            height={40}
-            style={{ width: "auto", height: "auto" }}
-            className="object-contain"
-          />
+ <Image
+  src="/logo-icon.png"
+  alt="Digitech Nexus"
+  width={42}
+  height={42}
+  className="object-contain"
+/>
           <span className="font-display font-semibold text-lg text-white">
             Digitech <span className="text-gold">Nexus</span>
           </span>
