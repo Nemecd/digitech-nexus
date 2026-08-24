@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { LayoutDashboard, Package, ShoppingCart, Users, DollarSign, Send, FileText, Mail } from "lucide-react";
 import SignOutButton from "@/components/SignOutButton";
+import AdminMobileNav from "@/components/AdminMobileNav";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -10,12 +11,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   if (!user) redirect("/login");
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
   if (profile?.role !== "admin") redirect("/dashboard");
 
   const links = [
@@ -24,18 +20,18 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
     { href: "/admin/users", label: "Users", icon: Users },
     { href: "/admin/commissions", label: "Commissions", icon: DollarSign },
-{ href: "/admin/withdrawals", label: "Withdrawals", icon: Send },
-{ href: "/admin/service-requests", label: "Service Requests", icon: FileText },
-{ href: "/admin/messages", label: "Messages", icon: Mail }
+    { href: "/admin/withdrawals", label: "Withdrawals", icon: Send },
+    { href: "/admin/service-requests", label: "Service Requests", icon: FileText },
+    { href: "/admin/messages", label: "Messages", icon: Mail },
   ];
 
   return (
     <div className="min-h-screen flex bg-cream">
-      <aside className="w-60 bg-navy text-cream flex-shrink-0 p-6">
+      <aside className="w-60 bg-navy text-cream flex-shrink-0 p-6 hidden md:flex md:flex-col">
         <div className="font-display font-semibold text-lg mb-10">
           Digitech <span className="text-gold">Admin</span>
         </div>
-        <nav className="flex flex-col gap-1">
+        <nav className="flex flex-col gap-1 flex-1">
           {links.map((l) => (
             <Link
               key={l.href}
@@ -45,10 +41,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               <l.icon size={17} /> {l.label}
             </Link>
           ))}
-          <SignOutButton />
         </nav>
+        <SignOutButton />
       </aside>
-      <main className="flex-1 p-8">{children}</main>
+
+      <div className="flex-1 flex flex-col min-w-0">
+        <AdminMobileNav />
+        <main className="flex-1 p-6 md:p-8 overflow-x-auto">{children}</main>
+      </div>
     </div>
   );
 }
