@@ -3,8 +3,6 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useCart } from "@/lib/cart-context";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import { CheckCircle2, Loader2 } from "lucide-react";
 
 export default function CheckoutSuccessClient() {
@@ -38,7 +36,6 @@ export default function CheckoutSuccessClient() {
 
   return (
     <>
-      <Navbar />
       <section className="bg-white min-h-[60vh] flex items-center justify-center">
         <div className="max-w-md mx-auto px-6 py-24 text-center">
           {pageStatus === "loading" && (
@@ -65,7 +62,6 @@ export default function CheckoutSuccessClient() {
           )}
         </div>
       </section>
-      <Footer />
     </>
   );
 }

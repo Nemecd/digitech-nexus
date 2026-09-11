@@ -65,12 +65,7 @@ export default async function CacServicesPage() {
                     <span className="font-display text-lg font-semibold text-gold">
                       ₦{Number(s.price).toLocaleString()}
                     </span>
-                    <Link
-                      href="/register"
-                      className="rounded-full bg-navy px-4 py-2 text-xs font-semibold text-cream hover:bg-gold hover:text-navy transition-colors inline-flex items-center gap-1"
-                    >
-                      <AddToCartButton id={s.id} title={s.title} price={Number(s.price)} type="nin_service" />
-                    </Link>
+                    <AddToCartButton id={s.id} title={s.title} price={Number(s.price)} type="cac_service" />
                   </div>
                 </div>
               ))}

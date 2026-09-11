@@ -11,7 +11,7 @@ export default async function ServiceRequestPage({ params }: { params: Promise<{
 
   const { data: userProduct } = await supabase
     .from("user_products")
-    .select("id, order_id, status, products(id, title, type, price)")
+    .select("id, order_id, status, products(id, title, type, price, metadata)")
     .eq("id", id)
     .eq("user_id", user.id)
     .single();
@@ -19,6 +19,7 @@ export default async function ServiceRequestPage({ params }: { params: Promise<{
   if (!userProduct) redirect("/dashboard/products");
 
   const product = userProduct.products as any;
+  const formTemplate = product.metadata?.form_template || null;
 
   return (
     <div>
@@ -29,6 +30,7 @@ export default async function ServiceRequestPage({ params }: { params: Promise<{
         userProductId={userProduct.id}
         productId={product.id}
         orderId={userProduct.order_id}
+        formTemplate={formTemplate}
       />
     </div>
   );

@@ -6,6 +6,7 @@ import { Toaster } from "react-hot-toast";
 import "./globals.css";
 import ReferralCapture from "@/components/ReferralCapture";
 import Preloader from "@/components/Preloader";
+import FloatingCartButton from "@/components/FloatingCartButton";
 
 export const metadata: Metadata = {
   title: "Digitech Nexus",
@@ -26,7 +27,7 @@ export default function RootLayout({
         <Preloader />
         <AnimatedBlobs />
         <div className="relative z-10">
-          <CartProvider>{children}</CartProvider>
+          <CartProvider>{children}<FloatingCartButton /></CartProvider>
         </div>
         <Toaster
           position="top-center"
@@ -42,6 +43,7 @@ export default function RootLayout({
           }}
         />
         <ReferralCapture />
+
       </body>
     </html>
   );

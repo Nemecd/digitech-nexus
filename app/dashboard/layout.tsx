@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
-import { LayoutDashboard, Package, Wallet, Bell, User, ShieldCheck, Users } from "lucide-react";
+import { LayoutDashboard, Package, Wallet, Bell, User, ShieldCheck, Users,ShoppingCart } from "lucide-react";
 import DashboardMobileNav from "@/components/DashboardMobileNav";
 import SignOutButton from "@/components/SignOutButton";
 
@@ -23,7 +23,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
     { href: "/dashboard/wallet", label: "Wallet", icon: Wallet },
     { href: "/dashboard/notifications", label: "Notifications", icon: Bell },
     { href: "/dashboard/profile", label: "Profile", icon: User },
-    { href: "/dashboard/affiliate", label: "Affiliate", icon: Users }
+    { href: "/dashboard/affiliate", label: "Affiliate", icon: Users },
+    { href: "/dashboard/cart", label: "Cart", icon: ShoppingCart },
   ];
 
   return (
@@ -53,7 +54,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           >
             <ShieldCheck size={17} /> Admin Panel
           </Link>
-          
+
         )}
         <SignOutButton />
       </aside>

@@ -3,6 +3,7 @@ import Footer from "@/components/Footer";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { GraduationCap, FileCheck, UploadCloud, Bell, ArrowRight, ShieldCheck, Plane, Award } from "lucide-react";
+import AddToCartButton from "@/components/AddToCartButton";
 
 export const revalidate = 60;
 
@@ -95,40 +96,36 @@ export default async function StudentPlacementPage() {
       </section>
 
       {/* Services / packages */}
-      <section className="relative bg-navy border-y border-gold/10">
-        <div className="relative z-10 max-w-7xl mx-auto px-6 py-20">
-          <h2 className="font-display text-3xl font-semibold text-cream mb-10 text-center">Available Packages</h2>
+{/* Services / packages */}
+<section className="relative bg-navy border-y border-gold/10">
+  <div className="relative z-10 max-w-7xl mx-auto px-6 py-20">
+    <h2 className="font-display text-3xl font-semibold text-cream mb-10 text-center">Available Packages</h2>
 
-          {services && services.length > 0 ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {services.map((s) => (
-                <div key={s.id} className="rounded-2xl bg-white/5 border border-white/10 p-6 hover:border-gold/40 transition-colors flex flex-col">
-                  <h3 className="font-display font-semibold text-cream mb-2">{s.title}</h3>
-                  <p className="text-sm text-cream/65 flex-1">{s.description}</p>
-                  <div className="flex items-center justify-between mt-6">
-                    <span className="font-display text-lg font-semibold text-gold">
-                      ₦{Number(s.price).toLocaleString()}
-                    </span>
-                    <Link
-                      href="/register"
-                      className="rounded-full bg-gold px-4 py-2 text-xs font-semibold text-navy hover:bg-gold/90 transition-colors inline-flex items-center gap-1"
-                    >
-                      Get Started <ArrowRight size={14} />
-                    </Link>
-                  </div>
-                </div>
-              ))}
+    {services && services.length > 0 ? (
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {services.map((s) => (
+          <div key={s.id} className="rounded-2xl bg-white/5 border border-white/10 p-6 hover:border-gold/40 transition-colors flex flex-col">
+            <h3 className="font-display font-semibold text-cream mb-2">{s.title}</h3>
+            <p className="text-sm text-cream/65 flex-1">{s.description}</p>
+            <div className="flex items-center justify-between mt-6">
+              <span className="font-display text-lg font-semibold text-gold">
+                ₦{Number(s.price).toLocaleString()}
+              </span>
+              <AddToCartButton id={s.id} title={s.title} price={Number(s.price)} type="student_placement" />
             </div>
-          ) : (
-            <div className="text-center rounded-2xl border border-white/10 bg-white/5 p-12 max-w-lg mx-auto">
-              <p className="text-cream/70">Our placement packages are being updated. Book a consultation and we&apos;ll guide you directly.</p>
-              <Link href="/register" className="text-gold hover:underline text-sm font-semibold mt-4 inline-block">
-                Book a consultation →
-              </Link>
-            </div>
-          )}
-        </div>
-      </section>
+          </div>
+        ))}
+      </div>
+    ) : (
+      <div className="text-center rounded-2xl border border-white/10 bg-white/5 p-12 max-w-lg mx-auto">
+        <p className="text-cream/70">Our placement packages are being updated. Book a consultation and we&apos;ll guide you directly.</p>
+        <Link href="/register" className="text-gold hover:underline text-sm font-semibold mt-4 inline-block">
+          Book a consultation →
+        </Link>
+      </div>
+    )}
+  </div>
+</section>
 
       {/* How it works */}
       <section className="relative bg-white">

@@ -3,15 +3,15 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/lib/cart-context";
 import { createClient } from "@/lib/supabase/client";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import AddToCartButton from "@/components/AddToCartButton";
 
 export default function CheckoutPage() {
-  const { items, total } = useCart();
+  const { items, total, addItem } = useCart();
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [suggestions, setSuggestions] = useState<any[]>([]);
 
   useEffect(() => {
     const supabase = createClient();
@@ -20,6 +20,16 @@ export default function CheckoutPage() {
       else setEmail(data.user.email || "");
     });
   }, [router]);
+
+  useEffect(() => {
+    fetch("/api/products/suggestions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ excludeIds: items.map((i) => i.id) }),
+    })
+      .then((res) => res.json())
+      .then((data) => setSuggestions(data.products || []));
+  }, [items]);
 
   async function handlePay() {
     setLoading(true);
@@ -41,19 +51,14 @@ export default function CheckoutPage() {
 
   if (items.length === 0) {
     return (
-      <>
-        <Navbar />
-        <div className="max-w-2xl mx-auto px-6 py-24 text-center">
-          <p className="text-slate">Your cart is empty.</p>
-        </div>
-        <Footer />
-      </>
+      <div className="max-w-2xl mx-auto px-6 py-24 text-center">
+        <p className="text-slate">Your cart is empty.</p>
+      </div>
     );
   }
 
   return (
     <>
-      <Navbar />
       <section className="bg-white min-h-[60vh]">
         <div className="max-w-2xl mx-auto px-6 py-16">
           <h1 className="font-display text-3xl font-semibold text-navy mb-8">Checkout</h1>
@@ -84,9 +89,27 @@ export default function CheckoutPage() {
           >
             {loading ? "Redirecting to payment…" : `Pay ₦${total.toLocaleString()} with Flutterwave`}
           </button>
+
+          {suggestions.length > 0 && (
+            <div className="mt-14 pt-10 border-t border-line">
+              <h2 className="font-display text-lg font-semibold text-navy mb-5">You might also like</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {suggestions.map((s) => (
+                  <div key={s.id} className="rounded-xl border border-line p-4">
+                    <p className="text-sm font-medium text-navy line-clamp-1">{s.title}</p>
+                    <p className="text-xs text-slate capitalize mb-3">{s.type.replace("_", " ")}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-semibold text-gold">₦{Number(s.price).toLocaleString()}</span>
+                      <AddToCartButton id={s.id} title={s.title} price={Number(s.price)} type={s.type} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </section>
-      <Footer />
+
     </>
   );
 }

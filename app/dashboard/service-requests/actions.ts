@@ -6,7 +6,7 @@ export async function submitServiceRequest(data: {
   userProductId: string;
   productId: string;
   orderId: string;
-  notes: string;
+  formData: Record<string, string | Record<string, string>[]>;
   documentPaths: string[];
 }) {
   const supabase = await createClient();
@@ -17,7 +17,7 @@ export async function submitServiceRequest(data: {
     user_id: user.id,
     product_id: data.productId,
     order_id: data.orderId,
-    form_data: { notes: data.notes },
+    form_data: data.formData,
     document_urls: data.documentPaths,
     status: "submitted",
   });

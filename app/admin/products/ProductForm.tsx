@@ -2,10 +2,13 @@
 import { useState } from "react";
 import { createProduct } from "./actions";
 import { Plus } from "lucide-react";
+import { FORM_TEMPLATES } from "@/lib/service-form-templates";
 
 export default function ProductForm() {
   const [type, setType] = useState("nin_service");
-
+const relevantTemplates = Object.entries(FORM_TEMPLATES).filter(([key]) =>
+  type === "nin_service" ? key.startsWith("nin_") : type === "cac_service" ? key.startsWith("cac_") : false
+);
   return (
     <form action={createProduct} className="rounded-2xl bg-white border border-line p-6 mb-10 space-y-4">
       <div className="grid md:grid-cols-5 gap-3 items-end">
@@ -43,7 +46,17 @@ export default function ProductForm() {
         <label className="text-xs text-slate">Description</label>
         <textarea name="description" rows={2} className="mt-1 w-full rounded-lg border border-line px-3 py-2 text-sm" />
       </div>
-
+{(type === "nin_service" || type === "cac_service") && (
+  <div>
+    <label className="text-xs text-slate">Request Form Template</label>
+    <select name="formTemplate" required className="mt-1 w-full rounded-lg border border-line px-3 py-2 text-sm bg-white">
+      <option value="">Select which form this service needs</option>
+      {relevantTemplates.map(([key, t]) => (
+        <option key={key} value={key}>{t.label}</option>
+      ))}
+    </select>
+  </div>
+)}
       <div className="grid md:grid-cols-2 gap-4">
         <div>
           <label className="text-xs text-slate">Thumbnail Image</label>

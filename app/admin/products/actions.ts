@@ -36,6 +36,7 @@ export async function createProduct(formData: FormData) {
     status: "published",
     thumbnail_url: thumbnailUrl,
     file_url: fileUrl,
+    metadata: formData.get("formTemplate") ? { form_template: formData.get("formTemplate") } : null,
   });
 
   revalidatePath("/admin/products");
@@ -81,4 +82,8 @@ export async function updateProduct(formData: FormData) {
   await supabase.from("products").update(updates).eq("id", productId);
   revalidatePath("/admin/products");
   revalidatePath(`/admin/products/${productId}/edit`);
+
+  if (formData.get("formTemplate")) {
+  updates.metadata = { form_template: formData.get("formTemplate") };
+}
 }
