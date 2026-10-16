@@ -1,13 +1,28 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
-import { LayoutDashboard, Package, Wallet, Bell, User, ShieldCheck, Users,ShoppingCart } from "lucide-react";
+import {
+  LayoutDashboard,
+  Package,
+  Wallet,
+  Bell,
+  User,
+  ShieldCheck,
+  Users,
+  ShoppingCart,
+} from "lucide-react";
 import DashboardMobileNav from "@/components/DashboardMobileNav";
 import SignOutButton from "@/components/SignOutButton";
 
-export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default async function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) redirect("/login");
 
@@ -33,7 +48,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
         <div className="font-display font-semibold text-lg mb-1">
           Digitech <span className="text-gold">Nexus</span>
         </div>
-        <p className="text-xs text-cream/50 mb-8">{profile?.full_name || "Welcome"}</p>
+        <p className="text-xs text-cream/50 mb-8">
+          {profile?.full_name || "Welcome"}
+        </p>
 
         <nav className="flex flex-col gap-1 flex-1">
           {links.map((l) => (
@@ -54,14 +71,16 @@ export default async function DashboardLayout({ children }: { children: React.Re
           >
             <ShieldCheck size={17} /> Admin Panel
           </Link>
-
         )}
         <SignOutButton />
       </aside>
 
-      <div className="flex-1 flex flex-col">
-        <DashboardMobileNav fullName={profile?.full_name || ""} isAdmin={profile?.role === "admin"} />
-        <main className="flex-1 p-6 md:p-8">{children}</main>
+      <div className="flex-1 flex flex-col min-w-0">
+        <DashboardMobileNav
+          fullName={profile?.full_name || ""}
+          isAdmin={profile?.role === "admin"}
+        />
+        <main className="flex-1 p-4 sm:p-6 md:p-8">{children}</main>
       </div>
     </div>
   );

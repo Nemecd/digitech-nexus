@@ -36,3 +36,54 @@
 .animate-spin-slower { animation: spin-slower 60s linear infinite; transform-box: fill-box; transform-origin: center; }
 .animate-pulse-node { animation: pulse-node 3s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
 .animate-draw { animation: draw-line 2.5s ease-out forwards; }
+
+/* ---------- Responsive tables ----------
+   Below md, every row becomes a stacked card.
+   Usage: <table class="responsive-table"> + data-label="Column" on each <td>.
+   data-label="" marks an actions cell; .mobile-hidden hides a cell on phones. */
+@media (max-width: 767px) {
+  .responsive-table,
+  .responsive-table tbody,
+  .responsive-table tr,
+  .responsive-table td {
+    display: block;
+    width: 100%;
+  }
+  .responsive-table thead {
+    display: none;
+  }
+  .responsive-table tr {
+    padding: 0.75rem 1.25rem;
+    border-top: 1px solid #e7e4dc;
+  }
+  .responsive-table tbody tr:first-child {
+    border-top: 0;
+  }
+  .responsive-table td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.4rem 0;
+    border: 0;
+    text-align: right;
+    overflow-wrap: anywhere;
+  }
+  .responsive-table td::before {
+    content: attr(data-label);
+    flex-shrink: 0;
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: #4b5468;
+    text-align: left;
+  }
+  .responsive-table td[data-label=""] {
+    justify-content: flex-end;
+    padding-top: 0.6rem;
+  }
+  .responsive-table td[data-label=""]::before,
+  .responsive-table td.mobile-hidden,
+  .responsive-table td:empty {
+    display: none;
+  }
+}

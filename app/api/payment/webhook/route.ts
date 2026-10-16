@@ -12,6 +12,31 @@ export async function POST(req: Request) {
   const event = await req.json();
   const supabase = createAdminClient();
 
+  if (event.event === "transfer.completed") {
+  const transferId = String(event.data.id);
+  const transferStatus = event.data.status; // 'SUCCESSFUL' | 'FAILED'
+
+  const { data: withdrawal } = await supabase
+    .from("withdrawals")
+    .select("id, affiliate_id, amount, status")
+    .eq("transfer_reference", transferId)
+    .single();
+
+  if (withdrawal && withdrawal.status === "processing") {
+    if (transferStatus === "SUCCESSFUL") {
+      await supabase.from("withdrawals").update({ status: "paid" }).eq("id", withdrawal.id);
+    } else {
+      // Flutterwave accepted it but the transfer itself failed — refund the affiliate
+      await supabase.from("withdrawals").update({ status: "failed" }).eq("id", withdrawal.id);
+      const { data: affiliate } = await supabase.from("affiliates").select("balance").eq("id", withdrawal.affiliate_id).single();
+      if (affiliate) {
+        await supabase.from("affiliates").update({ balance: Number(affiliate.balance) + Number(withdrawal.amount) }).eq("id", withdrawal.affiliate_id);
+      }
+    }
+  }
+  return NextResponse.json({ received: true });
+}
+
   if (event.event === "charge.completed" && event.data.status === "successful") {
     // Re-verify directly with Flutterwave rather than trusting the webhook body alone
     const verifyRes = await fetch(
@@ -20,7 +45,11 @@ export async function POST(req: Request) {
     );
     const verified = await verifyRes.json();
 
-    if (verified.data?.status !== "successful") {
+       if (verified.data?.status !== "successful") {
+      return NextResponse.json({ received: true });
+    }
+
+    if (verified.data.currency !== "NGN") {
       return NextResponse.json({ received: true });
     }
 

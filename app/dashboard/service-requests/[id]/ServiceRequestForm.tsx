@@ -12,8 +12,8 @@ function isGroupField(f: AnyField): f is RepeatableGroupField {
 }
 
 export default function ServiceRequestForm({
-  userProductId, productId, orderId, formTemplate,
-}: { userProductId: string; productId: string; orderId: string; formTemplate: string | null }) {
+  userProductId, productId, orderId, formTemplate, previewMode = false,
+}: { userProductId: string; productId: string; orderId: string; formTemplate: string | null; previewMode?: boolean })  {
   const template = formTemplate ? FORM_TEMPLATES[formTemplate] : null;
 
   const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
@@ -59,6 +59,11 @@ export default function ServiceRequestForm({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+      if (previewMode) {
+    toast.success("Preview only — nothing was submitted.");
+    return;
+  }
+
     setLoading(true);
     try {
       const supabase = createClient();

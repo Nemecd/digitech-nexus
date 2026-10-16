@@ -1,8 +1,9 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { updateProduct } from "../../actions";
 import toast from "react-hot-toast";
+import { updateProduct } from "../../actions";
+import { uploadThumbnail, uploadEbook } from "@/lib/admin-uploads";
 
 type Product = {
   id: string;
@@ -19,23 +20,42 @@ export default function EditProductForm({ product }: { product: Product }) {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  async function handleSubmit(formData: FormData) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+
+    const thumbnail = fd.get("thumbnail") as File | null;
+    const ebook = fd.get("ebookFile") as File | null;
+
     setLoading(true);
-    formData.set("productId", product.id);
-    formData.set("type", product.type);
     try {
-      await updateProduct(formData);
+      const thumbnailUrl = thumbnail && thumbnail.size > 0 ? await uploadThumbnail(thumbnail) : null;
+      const fileUrl = product.type === "ebook" && ebook && ebook.size > 0 ? await uploadEbook(ebook) : null;
+
+      const result = await updateProduct({
+        productId: product.id,
+        title: String(fd.get("title") || ""),
+        description: String(fd.get("description") || ""),
+        price: Number(fd.get("price")),
+        status: String(fd.get("status") || "published"),
+        thumbnailUrl,
+        fileUrl,
+      });
+
+      if (!result.success) throw new Error(result.error || "Could not update product");
+
       toast.success("Product updated");
       router.push("/admin/products");
-    } catch {
-      toast.error("Could not update product");
+      router.refresh();
+    } catch (err: any) {
+      toast.error(err.message || "Could not update product");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <form action={handleSubmit} className="rounded-2xl bg-white border border-line p-6 max-w-2xl space-y-4">
+    <form onSubmit={handleSubmit} className="rounded-2xl bg-white border border-line p-6 max-w-2xl space-y-4">
       <div>
         <label className="text-xs text-slate">Title</label>
         <input name="title" defaultValue={product.title} required className="mt-1 w-full rounded-lg border border-line px-3 py-2 text-sm" />
@@ -75,7 +95,7 @@ export default function EditProductForm({ product }: { product: Product }) {
           <div>
             <label className="text-xs text-slate">eBook File (PDF)</label>
             {product.file_url && (
-              <p className="text-xs text-gold mt-1 mb-2">Current file: {product.file_url}</p>
+              <p className="text-xs text-gold mt-1 mb-2 break-all">Current file: {product.file_url}</p>
             )}
             <input name="ebookFile" type="file" accept=".pdf" className="w-full text-sm" />
             <p className="text-xs text-slate/70 mt-1">Leave empty to keep the current file.</p>

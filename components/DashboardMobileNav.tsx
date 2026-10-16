@@ -37,7 +37,7 @@ export default function DashboardMobileNav({
       </div>
 
       {open && (
-        <div className="fixed inset-0 z-50 bg-navy/98 flex flex-col p-6">
+        <div className="fixed inset-0 z-50 bg-navy/98 flex flex-col p-6 overflow-y-auto">
           <div className="flex items-center justify-between mb-8">
             <span className="font-display font-semibold text-cream">
               Digitech <span className="text-gold">Nexus</span>

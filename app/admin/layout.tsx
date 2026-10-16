@@ -23,6 +23,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     { href: "/admin/withdrawals", label: "Withdrawals", icon: Send },
     { href: "/admin/service-requests", label: "Service Requests", icon: FileText },
     { href: "/admin/messages", label: "Messages", icon: Mail },
+    { href: "/admin/form-preview", label: "Form Preview", icon: FileText },
   ];
 
   return (

@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { addBankAccount } from "./actions";
+import SubmitButton from "@/components/SubmitButton";
 
 export default function BankAccountForm() {
   const [banks, setBanks] = useState<{ code: string; name: string }[]>([]);
@@ -73,12 +74,13 @@ export default function BankAccountForm() {
       )}
       {error && <p className="text-xs text-red-500">{error}</p>}
 
-      <button
+      <SubmitButton
         disabled={!accountName}
-        className="w-full rounded-full bg-navy text-cream py-2.5 text-sm font-semibold hover:bg-gold hover:text-navy transition-colors disabled:opacity-50"
+        pendingText="Saving…"
+        className="w-full rounded-full bg-navy text-cream py-2.5 text-sm font-semibold hover:bg-gold hover:text-navy transition-colors"
       >
         Save Bank Account
-      </button>
+      </SubmitButton>
     </form>
   );
 }

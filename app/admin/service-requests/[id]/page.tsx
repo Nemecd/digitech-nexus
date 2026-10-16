@@ -1,7 +1,10 @@
+await requireAdmin();
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { updateRequestStatus } from "./actions";
 import { FileText } from "lucide-react";
+import SubmitButton from "@/components/SubmitButton";
+import { requireAdmin } from "@/lib/auth";
 
 export default async function AdminServiceRequestDetailPage({
   params,
@@ -11,15 +14,21 @@ export default async function AdminServiceRequestDetailPage({
   const { id } = await params;
 
   const supabase = await createClient();
-  const { data: request } = await supabase
+  const { data: request, error } = await supabase
     .from("service_requests")
     .select(
-      "id, status, form_data, document_urls, admin_notes, admin_request_note, created_at, products(title), profiles(full_name, phone)",
+      "id, status, form_data, document_urls, admin_notes, admin_request_note, created_at, products(title), profiles!service_requests_user_id_fkey(full_name, phone)",
     )
     .eq("id", id)
     .single();
 
-  if (!request) return <p className="text-slate">Request not found.</p>;
+  if (!request) {
+    return (
+      <p className="text-slate">
+        Request not found.{error ? ` (${error.message})` : ""}
+      </p>
+    );
+  }
 
   const { data: updates } = await supabase
     .from("service_request_updates")
@@ -29,31 +38,28 @@ export default async function AdminServiceRequestDetailPage({
 
   const admin = createAdminClient();
 
-  const documentLinks = await Promise.all(
-    (request.document_urls || []).map(async (path: string) => {
-      const { data } = await admin.storage
-        .from("service-documents")
-        .createSignedUrl(path, 3600);
-      return { path, url: data?.signedUrl };
-    }),
-  );
+  async function signPaths(paths: string[] | null) {
+    return Promise.all(
+      (paths || []).map(async (path) => {
+        const { data } = await admin.storage
+          .from("service-documents")
+          .createSignedUrl(path, 3600);
+        return { path, url: data?.signedUrl };
+      }),
+    );
+  }
 
+  const documentLinks = await signPaths(request.document_urls);
   const updateLinks = await Promise.all(
     (updates || []).map(async (u) => ({
       ...u,
-      links: await Promise.all(
-        (u.document_urls || []).map(async (path: string) => {
-          const { data } = await admin.storage
-            .from("service-documents")
-            .createSignedUrl(path, 3600);
-          return { path, url: data?.signedUrl };
-        }),
-      ),
+      links: await signPaths(u.document_urls),
     })),
   );
 
   const customer = request.profiles as any;
   const product = request.products as any;
+  const formData = (request.form_data || {}) as Record<string, any>;
 
   return (
     <div className="max-w-2xl">
@@ -68,63 +74,81 @@ export default async function AdminServiceRequestDetailPage({
         <h3 className="font-display font-semibold text-navy mb-3">
           Details Submitted
         </h3>
-        {request.form_data &&
-        Object.keys(request.form_data as any).length > 0 ? (
+        {Object.keys(formData).length > 0 ? (
           <div className="space-y-4">
-            {Object.entries(request.form_data as Record<string, any>).map(
-              ([key, value]) => {
-                if (Array.isArray(value)) {
-                  return (
-                    <div key={key}>
-                      <p className="text-xs font-semibold text-gold uppercase tracking-wide mb-2">
-                        {key.replace(/_/g, " ")}
-                      </p>
-                      <div className="space-y-3">
-                        {value.map(
-                          (item: Record<string, string>, i: number) => (
-                            <div key={i} className="rounded-lg bg-cream p-3">
-                              <p className="text-xs font-semibold text-navy mb-1.5">
-                                #{i + 1}
-                              </p>
-                              <dl className="space-y-1">
-                                {Object.entries(item).map(([k, v]) => (
-                                  <div
-                                    key={k}
-                                    className="flex justify-between text-xs"
-                                  >
-                                    <dt className="text-slate capitalize">
-                                      {k.replace(/_/g, " ")}
-                                    </dt>
-                                    <dd className="text-navy font-medium">
-                                      {v || "—"}
-                                    </dd>
-                                  </div>
-                                ))}
-                              </dl>
-                            </div>
-                          ),
-                        )}
-                      </div>
-                    </div>
-                  );
-                }
+            {Object.entries(formData).map(([key, value]) => {
+              if (Array.isArray(value)) {
                 return (
-                  <div
-                    key={key}
-                    className="flex flex-col sm:flex-row sm:justify-between text-sm border-b border-line/50 pb-2"
-                  >
-                    <dt className="text-slate capitalize">
+                  <div key={key}>
+                    <p className="text-xs font-semibold text-gold uppercase tracking-wide mb-2">
                       {key.replace(/_/g, " ")}
-                    </dt>
-                    <dd className="text-navy font-medium">{value || "—"}</dd>
+                    </p>
+                    <div className="space-y-3">
+                      {value.map((item: Record<string, string>, i: number) => (
+                        <div key={i} className="rounded-lg bg-cream p-3">
+                          <p className="text-xs font-semibold text-navy mb-1.5">
+                            #{i + 1}
+                          </p>
+                          <dl className="space-y-1">
+                            {Object.entries(item).map(([k, v]) => (
+                              <div
+                                key={k}
+                                className="flex justify-between gap-4 text-xs"
+                              >
+                                <dt className="text-slate capitalize">
+                                  {k.replace(/_/g, " ")}
+                                </dt>
+                                <dd className="text-navy font-medium text-right">
+                                  {v || "—"}
+                                </dd>
+                              </div>
+                            ))}
+                          </dl>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 );
-              },
-            )}
+              }
+              return (
+                <div
+                  key={key}
+                  className="flex flex-col sm:flex-row sm:justify-between gap-1 text-sm border-b border-line/50 pb-2"
+                >
+                  <dt className="text-slate capitalize">
+                    {key.replace(/_/g, " ")}
+                  </dt>
+                  <dd className="text-navy font-medium sm:text-right">
+                    {String(value) || "—"}
+                  </dd>
+                </div>
+              );
+            })}
           </div>
         ) : (
           <p className="text-sm text-slate">No details submitted.</p>
         )}
+
+        <div className="mt-5 pt-4 border-t border-line">
+          <p className="text-xs font-semibold text-slate mb-2">Documents</p>
+          {documentLinks.length > 0 ? (
+            <div className="space-y-2">
+              {documentLinks.map((d, i) => (
+                <a
+                  key={i}
+                  href={d.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-sm text-gold hover:underline"
+                >
+                  <FileText size={14} /> Document {i + 1}
+                </a>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-slate">No documents uploaded.</p>
+          )}
+        </div>
       </div>
 
       {updateLinks.length > 0 && (
@@ -198,9 +222,12 @@ export default async function AdminServiceRequestDetailPage({
             placeholder="Internal notes (optional)"
             className="w-full rounded-lg border border-line px-3 py-2.5 text-sm"
           />
-          <button className="w-full rounded-full bg-navy text-cream py-2.5 text-sm font-semibold hover:bg-gold hover:text-navy transition-colors">
+          <SubmitButton
+            pendingText="Updating…"
+            className="w-full rounded-full bg-navy text-cream py-2.5 text-sm font-semibold hover:bg-gold hover:text-navy transition-colors"
+          >
             Update Status
-          </button>
+          </SubmitButton>
         </form>
       </div>
     </div>

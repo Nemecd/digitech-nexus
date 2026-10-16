@@ -1,22 +1,65 @@
 "use client";
 import { useState } from "react";
-import { createProduct } from "./actions";
-import { Plus } from "lucide-react";
+import toast from "react-hot-toast";
+import { Plus, Loader2 } from "lucide-react";
 import { FORM_TEMPLATES } from "@/lib/service-form-templates";
+import { uploadThumbnail, uploadEbook } from "@/lib/admin-uploads";
+import { createProduct } from "./actions";
 
 export default function ProductForm() {
   const [type, setType] = useState("nin_service");
-const relevantTemplates = Object.entries(FORM_TEMPLATES).filter(([key]) =>
-  type === "nin_service" ? key.startsWith("nin_") : type === "cac_service" ? key.startsWith("cac_") : false
-);
+  const [loading, setLoading] = useState(false);
+
+  const relevantTemplates = Object.entries(FORM_TEMPLATES).filter(([key]) =>
+    type === "nin_service" ? key.startsWith("nin_") : type === "cac_service" ? key.startsWith("cac_") : false
+  );
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const fd = new FormData(form);
+
+    const thumbnail = fd.get("thumbnail") as File | null;
+    const ebook = fd.get("ebookFile") as File | null;
+
+    if (type === "ebook" && (!ebook || ebook.size === 0)) {
+      toast.error("Please attach the eBook PDF.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Files go straight from the browser to storage; the server only gets their paths
+      const thumbnailUrl = thumbnail && thumbnail.size > 0 ? await uploadThumbnail(thumbnail) : null;
+      const fileUrl = type === "ebook" && ebook && ebook.size > 0 ? await uploadEbook(ebook) : null;
+
+      const result = await createProduct({
+        type,
+        title: String(fd.get("title") || ""),
+        description: String(fd.get("description") || ""),
+        price: Number(fd.get("price")),
+        thumbnailUrl,
+        fileUrl,
+        formTemplate: (fd.get("formTemplate") as string) || null,
+      });
+
+      if (!result.success) throw new Error(result.error || "Could not create product");
+
+      toast.success("Product added");
+      form.reset();
+    } catch (err: any) {
+      toast.error(err.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
-    <form action={createProduct} className="rounded-2xl bg-white border border-line p-6 mb-10 space-y-4">
+    <form onSubmit={handleSubmit} className="rounded-2xl bg-white border border-line p-6 mb-10 space-y-4">
       <div className="grid md:grid-cols-5 gap-3 items-end">
         <div className="md:col-span-1">
           <label className="text-xs text-slate">Type</label>
           <select
-            name="type"
-            required
             value={type}
             onChange={(e) => setType(e.target.value)}
             className="mt-1 w-full rounded-lg border border-line px-3 py-2 text-sm"
@@ -37,8 +80,12 @@ const relevantTemplates = Object.entries(FORM_TEMPLATES).filter(([key]) =>
           <label className="text-xs text-slate">Price (₦)</label>
           <input name="price" type="number" required className="mt-1 w-full rounded-lg border border-line px-3 py-2 text-sm" />
         </div>
-        <button type="submit" className="rounded-lg bg-navy text-cream px-4 py-2 text-sm font-semibold hover:bg-gold hover:text-navy transition-colors inline-flex items-center justify-center gap-1.5">
-          <Plus size={16} /> Add
+        <button
+          type="submit"
+          disabled={loading}
+          className="rounded-lg bg-navy text-cream px-4 py-2 text-sm font-semibold hover:bg-gold hover:text-navy transition-colors inline-flex items-center justify-center gap-1.5 disabled:opacity-50"
+        >
+          {loading ? <><Loader2 size={16} className="animate-spin" /> Saving…</> : <><Plus size={16} /> Add</>}
         </button>
       </div>
 
@@ -46,17 +93,19 @@ const relevantTemplates = Object.entries(FORM_TEMPLATES).filter(([key]) =>
         <label className="text-xs text-slate">Description</label>
         <textarea name="description" rows={2} className="mt-1 w-full rounded-lg border border-line px-3 py-2 text-sm" />
       </div>
-{(type === "nin_service" || type === "cac_service") && (
-  <div>
-    <label className="text-xs text-slate">Request Form Template</label>
-    <select name="formTemplate" required className="mt-1 w-full rounded-lg border border-line px-3 py-2 text-sm bg-white">
-      <option value="">Select which form this service needs</option>
-      {relevantTemplates.map(([key, t]) => (
-        <option key={key} value={key}>{t.label}</option>
-      ))}
-    </select>
-  </div>
-)}
+
+      {(type === "nin_service" || type === "cac_service") && (
+        <div>
+          <label className="text-xs text-slate">Request Form Template</label>
+          <select name="formTemplate" required className="mt-1 w-full rounded-lg border border-line px-3 py-2 text-sm bg-white">
+            <option value="">Select which form this service needs</option>
+            {relevantTemplates.map(([key, t]) => (
+              <option key={key} value={key}>{t.label}</option>
+            ))}
+          </select>
+        </div>
+      )}
+
       <div className="grid md:grid-cols-2 gap-4">
         <div>
           <label className="text-xs text-slate">Thumbnail Image</label>

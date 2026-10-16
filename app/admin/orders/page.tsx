@@ -11,8 +11,8 @@ export default async function AdminOrdersPage() {
     <div>
       <h1 className="font-display text-2xl font-semibold text-navy mb-8">Orders</h1>
 
-      <div className="rounded-2xl bg-white border border-line overflow-hidden">
-        <table className="w-full text-sm">
+      <div className="rounded-2xl bg-white border border-line overflow-x-auto">
+        <table className="responsive-table w-full text-sm">
           <thead className="bg-cream text-left text-slate">
             <tr>
               <th className="px-5 py-3 font-medium">Customer</th>
@@ -25,23 +25,39 @@ export default async function AdminOrdersPage() {
           <tbody>
             {orders?.map((o: any) => (
               <tr key={o.id} className="border-t border-line">
-                <td className="px-5 py-3 text-navy font-medium">{o.profiles?.full_name || "—"}</td>
-                <td className="px-5 py-3 text-slate">
-                  {o.order_items?.map((i: any) => i.products?.title).join(", ")}
+                <td data-label="Customer" className="px-5 py-3 text-navy font-medium">
+                  {o.profiles?.full_name || "—"}
                 </td>
-                <td className="px-5 py-3 text-slate">₦{Number(o.total_amount).toLocaleString()}</td>
-                <td className="px-5 py-3">
-                  <span className={`text-xs px-2 py-1 rounded-full font-semibold ${
-                    o.payment_status === "paid" ? "bg-gold/10 text-gold" : "bg-red-50 text-red-500"
-                  }`}>
+                <td data-label="Items" className="px-5 py-3 text-slate">
+                  {o.order_items?.map((i: any) => i.products?.title).join(", ") || "—"}
+                </td>
+                <td data-label="Total" className="px-5 py-3 text-slate">
+                  ₦{Number(o.total_amount).toLocaleString()}
+                </td>
+                <td data-label="Status" className="px-5 py-3">
+                  <span
+                    className={`text-xs px-2 py-1 rounded-full font-semibold ${
+                      o.payment_status === "paid"
+                        ? "bg-gold/10 text-gold"
+                        : o.payment_status === "failed"
+                        ? "bg-red-50 text-red-500"
+                        : "bg-cream text-slate"
+                    }`}
+                  >
                     {o.payment_status}
                   </span>
                 </td>
-                <td className="px-5 py-3 text-slate text-xs">{new Date(o.created_at).toLocaleDateString()}</td>
+                <td data-label="Date" className="px-5 py-3 text-slate text-xs">
+                  {new Date(o.created_at).toLocaleDateString()}
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
+
+        {(!orders || orders.length === 0) && (
+          <p className="px-5 py-10 text-center text-sm text-slate">No orders yet.</p>
+        )}
       </div>
     </div>
   );

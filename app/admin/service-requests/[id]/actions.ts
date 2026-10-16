@@ -1,6 +1,21 @@
 "use server";
 import { createClient } from "@/lib/supabase/server";
+import { notify } from "@/lib/notify";
 import { revalidatePath } from "next/cache";
+
+const CUSTOMER_STATUS: Record<string, string> = {
+  submitted: "in_review",
+  in_review: "in_review",
+  awaiting_docs: "awaiting_docs",
+  completed: "completed",
+  rejected: "rejected",
+};
+
+const NOTIFY_TEXT: Record<string, { title: string; message: string }> = {
+  in_review: { title: "Request in review", message: "Your service request is being reviewed." },
+  completed: { title: "Request completed", message: "Your service request has been completed." },
+  rejected: { title: "Request rejected", message: "Your service request could not be completed. Please contact support." },
+};
 
 export async function updateRequestStatus(formData: FormData) {
   const requestId = formData.get("requestId") as string;
@@ -12,41 +27,43 @@ export async function updateRequestStatus(formData: FormData) {
 
   const { data: request } = await supabase
     .from("service_requests")
-    .select("user_id, order_id, product_id")
+    .select("user_id, order_id, product_id, status")
     .eq("id", requestId)
     .single();
   if (!request) return;
 
-  await supabase.from("service_requests").update({
-    status,
-    admin_notes: adminNotes,
-    admin_request_note: status === "awaiting_docs" ? adminRequestNote : null,
-  }).eq("id", requestId);
+  const { error } = await supabase
+    .from("service_requests")
+    .update({
+      status,
+      admin_notes: adminNotes,
+      admin_request_note: status === "awaiting_docs" ? adminRequestNote : null,
+    })
+    .eq("id", requestId);
+  if (error) return;
 
-  if (status === "completed" || status === "rejected") {
+  const customerStatus = CUSTOMER_STATUS[status];
+  if (customerStatus) {
     await supabase
       .from("user_products")
-      .update({ status: status === "completed" ? "completed" : "rejected" })
+      .update({ status: customerStatus })
       .eq("order_id", request.order_id)
       .eq("product_id", request.product_id);
   }
 
-  if (status === "awaiting_docs") {
-    await supabase
-      .from("user_products")
-      .update({ status: "awaiting_docs" })
-      .eq("order_id", request.order_id)
-      .eq("product_id", request.product_id);
+  if (request.status !== status) {
+    if (status === "awaiting_docs") {
+      await notify(
+        request.user_id,
+        "Additional documents needed",
+        adminRequestNote || "We need additional information to process your request.",
+        "service_status"
+      );
+    } else if (NOTIFY_TEXT[status]) {
+      await notify(request.user_id, NOTIFY_TEXT[status].title, NOTIFY_TEXT[status].message, "service_status");
+    }
   }
-
-  await supabase.from("notifications").insert({
-    user_id: request.user_id,
-    title: status === "awaiting_docs" ? "Additional documents needed" : `Request ${status.replace("_", " ")}`,
-    message: status === "awaiting_docs"
-      ? (adminRequestNote || "We need additional information to process your request.")
-      : `Your service request status has been updated to ${status.replace("_", " ")}.`,
-    type: "service_status",
-  });
 
   revalidatePath(`/admin/service-requests/${requestId}`);
+  revalidatePath("/admin/service-requests");
 }

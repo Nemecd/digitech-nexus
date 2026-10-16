@@ -9,19 +9,20 @@ export async function getDownloadUrl(userProductId: string) {
 
   const { data: userProduct } = await supabase
     .from("user_products")
-    .select("id, user_id, products(file_url, type)")
+    .select("id, user_id, status, products(file_url, type)")
     .eq("id", userProductId)
     .eq("user_id", user.id)
     .single();
 
-  if (!userProduct || (userProduct.products as any)?.type !== "ebook") {
+  const product = userProduct?.products as any;
+  if (!userProduct || product?.type !== "ebook" || userProduct.status !== "active" || !product?.file_url) {
     throw new Error("Not authorized to download this item");
   }
 
   const admin = createAdminClient();
   const { data, error } = await admin.storage
     .from("ebooks")
-    .createSignedUrl((userProduct.products as any).file_url, 3600); // expires in 1 hour
+    .createSignedUrl(product.file_url, 3600, { download: true });
 
   if (error || !data) throw new Error("Could not generate download link");
   return data.signedUrl;

@@ -76,3 +76,26 @@ export async function requestWithdrawal(formData: FormData) {
 
   revalidatePath("/dashboard/affiliate");
 }
+
+export async function getOrCreateProductLink(productId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
+
+  const { data: affiliate } = await supabase.from("affiliates").select("id, referral_code").eq("user_id", user.id).single();
+  if (!affiliate) throw new Error("Not an affiliate");
+
+  const { data: existing } = await supabase
+    .from("affiliate_links")
+    .select("code")
+    .eq("affiliate_id", affiliate.id)
+    .eq("product_id", productId)
+    .single();
+
+  if (existing) return existing.code;
+
+  const code = `${affiliate.referral_code}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+  const { error } = await supabase.from("affiliate_links").insert({ affiliate_id: affiliate.id, product_id: productId, code });
+  if (error) throw new Error("Could not create link");
+  return code;
+}
