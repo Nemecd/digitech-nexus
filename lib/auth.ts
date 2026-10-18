@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
-// Call at the top of any page or action that uses the service-role client.
+// Call at the top of any page or action that uses the service-role client
+// or that only admins should reach.
 export async function requireAdmin() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();

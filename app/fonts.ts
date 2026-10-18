@@ -1,20 +1,51 @@
-import { Fraunces, Inter, IBM_Plex_Mono } from "next/font/google";
+import localFont from "next/font/local";
 
-export const fraunces = Fraunces({
-  subsets: ["latin"],
+// Fonts are served from your own project (installed from npm), so the build and
+// the dev server never need to reach Google. Same variable names as before, so
+// layout.tsx and the Tailwind theme keep working unchanged.
+
+export const fraunces = localFont({
+  src: [
+    {
+      path: "../node_modules/@fontsource-variable/fraunces/files/fraunces-latin-wght-normal.woff2",
+      style: "normal",
+      weight: "100 900",
+    },
+    {
+      path: "../node_modules/@fontsource-variable/fraunces/files/fraunces-latin-wght-italic.woff2",
+      style: "italic",
+      weight: "100 900",
+    },
+  ],
   variable: "--font-fraunces",
-  weight: ["500", "600", "700"],
-  style: ["normal", "italic"],
+  display: "swap",
 });
 
-export const inter = Inter({
-  subsets: ["latin"],
+export const inter = localFont({
+  src: [
+    {
+      path: "../node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2",
+      style: "normal",
+      weight: "100 900",
+    },
+  ],
   variable: "--font-inter",
-  weight: ["400", "500", "600"],
+  display: "swap",
 });
 
-export const plexMono = IBM_Plex_Mono({
-  subsets: ["latin"],
+export const plexMono = localFont({
+  src: [
+    {
+      path: "../node_modules/@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-400-normal.woff2",
+      style: "normal",
+      weight: "400",
+    },
+    {
+      path: "../node_modules/@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-500-normal.woff2",
+      style: "normal",
+      weight: "500",
+    },
+  ],
   variable: "--font-plex-mono",
-  weight: ["400", "500"],
+  display: "swap",
 });

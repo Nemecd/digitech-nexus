@@ -1,12 +1,13 @@
-await requireAdmin();
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { requireAdmin } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import UserActionsMenu from "./UserActionsMenu";
-import { requireAdmin } from "@/lib/auth";
 
 async function updateRole(formData: FormData): Promise<{ success: boolean; error?: string }> {
   "use server";
+  await requireAdmin();
+
   const supabase = await createClient();
   const { error } = await supabase
     .from("profiles")
@@ -19,6 +20,10 @@ async function updateRole(formData: FormData): Promise<{ success: boolean; error
 }
 
 export default async function AdminUsersPage() {
+  // Must be INSIDE the function. Outside it, the build fails with
+  // "cookies was called outside a request scope".
+  await requireAdmin();
+
   const supabase = await createClient();
   const admin = createAdminClient();
 
