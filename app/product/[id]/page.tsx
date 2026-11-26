@@ -5,8 +5,10 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AddToCartButton from "@/components/AddToCartButton";
+import BookServiceButton from "@/components/BookServiceButton";
+import { isBookingOnly, whatsappLink } from "@/lib/booking-config";
 import ReviewForm, { DeleteReviewButton } from "./ReviewForm";
-import { ArrowRight, BookOpen, MonitorPlay, PlayCircle, Star, UserRound } from "lucide-react";
+import { ArrowRight, BookOpen, MessageCircle, MonitorPlay, PlayCircle, Star, UserRound } from "lucide-react";
 
 function Stars({ value, size = 14 }: { value: number; size?: number }) {
   return (
@@ -41,6 +43,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
 
   const isCourse = product.type === "course";
   const isEbook = product.type === "ebook";
+  const bookingOnly = isBookingOnly(product.type);
   const meta = (product.metadata ?? {}) as { instructor_name?: string; instructor_bio?: string };
 
   const { data: { user } } = await supabase.auth.getUser();
@@ -105,8 +108,22 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
       <Navbar />
       <section className="bg-white">
         <div className="max-w-5xl mx-auto px-6 py-12 sm:py-16">
-          <div className="grid md:grid-cols-2 gap-8 sm:gap-10 items-start">
-            {product.thumbnail_url ? (
+          <div className={`grid gap-8 sm:gap-10 items-start ${isEbook ? "md:grid-cols-[17rem_1fr]" : "md:grid-cols-2"}`}>
+            {isEbook ? (
+              /* eBooks are shown in a book-cover frame (2:3) */
+              <div className="mx-auto md:mx-0 w-56 md:w-full">
+                <div className="relative aspect-[2/3] overflow-hidden rounded-lg bg-navy shadow-2xl ring-1 ring-black/10">
+                  {product.thumbnail_url ? (
+                    <img src={product.thumbnail_url} alt={product.title} className="absolute inset-0 h-full w-full object-cover" />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <BookOpen size={44} className="text-gold/70" />
+                    </div>
+                  )}
+                  <div className="pointer-events-none absolute inset-y-0 left-0 w-3 bg-gradient-to-r from-black/25 to-transparent" />
+                </div>
+              </div>
+            ) : product.thumbnail_url ? (
               <img src={product.thumbnail_url} alt={product.title} className="w-full rounded-2xl object-cover aspect-square" />
             ) : (
               <div className="w-full rounded-2xl bg-cream flex items-center justify-center aspect-square">
@@ -134,7 +151,25 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
 
               <p className="text-slate leading-relaxed mb-8 whitespace-pre-wrap">{product.description}</p>
 
-              {owned ? (
+              {bookingOnly ? (
+                <div className="rounded-2xl border border-line p-5">
+                  <p className="text-sm font-semibold text-navy">Book this service</p>
+                  <p className="text-xs text-slate mt-1 mb-4">
+                    Fill in a short form, or chat with us on WhatsApp. No online payment needed.
+                  </p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <BookServiceButton productId={product.id} returnTo={`/product/${product.id}`} />
+                    <a
+                      href={whatsappLink(`Hello Digitech Nexus, I'd like to book: ${product.title}`)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-navy/20 px-4 py-2 text-xs font-semibold text-navy hover:border-gold hover:text-gold transition-colors"
+                    >
+                      <MessageCircle size={14} /> WhatsApp
+                    </a>
+                  </div>
+                </div>
+              ) : owned ? (
                 <div className="rounded-2xl border border-gold/40 bg-gold/5 p-5">
                   <p className="text-sm font-semibold text-navy mb-3">You own this {isCourse ? "course" : "eBook"}</p>
                   <Link

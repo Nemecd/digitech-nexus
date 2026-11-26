@@ -60,10 +60,18 @@ export default function ProductLinksList({
             key={p.id}
             className="flex sm:flex-col rounded-2xl bg-white border border-line overflow-hidden hover:border-gold/50 hover:shadow-md transition-all"
           >
-            {/* Thumbnail */}
-            <div className="relative w-28 sm:w-full sm:aspect-video flex-shrink-0 bg-cream">
+            {/* Thumbnail: eBook covers are shown whole (never cropped), courses fill a wide frame */}
+            <div
+              className={`relative flex-shrink-0 bg-cream ${
+                isEbook ? "w-28 sm:w-full sm:aspect-[4/3]" : "w-28 sm:w-full sm:aspect-video"
+              }`}
+            >
               {p.thumbnail_url ? (
-                <img src={p.thumbnail_url} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                <img
+                  src={p.thumbnail_url}
+                  alt=""
+                  className={`absolute inset-0 h-full w-full ${isEbook ? "object-contain p-2 sm:p-3" : "object-cover"}`}
+                />
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <Icon size={28} className="text-slate/30" />

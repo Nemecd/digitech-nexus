@@ -27,7 +27,7 @@ export async function updateRequestStatus(formData: FormData) {
 
   const { data: request } = await supabase
     .from("service_requests")
-    .select("user_id, order_id, product_id, status")
+    .select("user_id, order_id, product_id, user_product_id, status")
     .eq("id", requestId)
     .single();
   if (!request) return;
@@ -42,13 +42,18 @@ export async function updateRequestStatus(formData: FormData) {
     .eq("id", requestId);
   if (error) return;
 
+  // Keep the customer's "My Products" status in step with the request
   const customerStatus = CUSTOMER_STATUS[status];
   if (customerStatus) {
-    await supabase
-      .from("user_products")
-      .update({ status: customerStatus })
-      .eq("order_id", request.order_id)
-      .eq("product_id", request.product_id);
+    if (request.user_product_id) {
+      await supabase.from("user_products").update({ status: customerStatus }).eq("id", request.user_product_id);
+    } else {
+      await supabase
+        .from("user_products")
+        .update({ status: customerStatus })
+        .eq("order_id", request.order_id)
+        .eq("product_id", request.product_id);
+    }
   }
 
   if (request.status !== status) {

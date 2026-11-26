@@ -7,7 +7,7 @@ import { revalidatePath } from "next/cache";
 export async function submitServiceRequest(data: {
   userProductId: string;
   productId: string; // kept so the form needs no change; the real value is read from the database
-  orderId: string;   // same
+  orderId: string | null; // same (a booking made without payment has no order)
   formData: Record<string, string | Record<string, string>[]>;
   documentPaths: string[];
 }) {
@@ -43,6 +43,7 @@ export async function submitServiceRequest(data: {
     user_id: user.id,
     product_id: owned.product_id,
     order_id: owned.order_id,
+    user_product_id: owned.id,
     form_data: data.formData,
     document_urls: data.documentPaths,
     status: "submitted",

@@ -53,13 +53,17 @@ export async function updateProduct(input: {
   status: string;
   thumbnailUrl: string | null; // null = keep the current one
   fileUrl: string | null;      // null = keep the current one
-  formTemplate?: string | null;
+  formTemplate?: string | null; // which request form a service uses; empty = leave as it is
 }): Promise<Result> {
   const auth = await requireAdmin();
   if (!auth.ok) return { success: false, error: auth.error };
 
   const admin = createAdminClient();
-  const { data: existing } = await admin.from("products").select("file_url").eq("id", input.productId).single();
+  const { data: existing } = await admin
+    .from("products")
+    .select("file_url, metadata")
+    .eq("id", input.productId)
+    .single();
 
   const updates: Record<string, any> = {
     title: input.title,
@@ -69,7 +73,14 @@ export async function updateProduct(input: {
   };
   if (input.thumbnailUrl) updates.thumbnail_url = input.thumbnailUrl;
   if (input.fileUrl) updates.file_url = input.fileUrl;
-  if (input.formTemplate) updates.metadata = { form_template: input.formTemplate };
+
+  // Merge into metadata so other settings on the product (like instructor details) are kept
+  if (input.formTemplate) {
+    updates.metadata = {
+      ...((existing?.metadata as Record<string, unknown> | null) ?? {}),
+      form_template: input.formTemplate,
+    };
+  }
 
   const { error } = await auth.supabase.from("products").update(updates).eq("id", input.productId);
   if (error) return { success: false, error: error.message };

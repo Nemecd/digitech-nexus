@@ -1,5 +1,6 @@
 "use client";
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { isBookingOnly } from "@/lib/booking-config";
 
 export type CartItem = {
   id: string;
@@ -30,7 +31,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       try {
-        setItems(JSON.parse(saved));
+        const parsed: CartItem[] = JSON.parse(saved);
+        // NIN services are booked with a form now, so drop any left in an old cart
+        setItems(parsed.filter((item) => !isBookingOnly(item.type)));
       } catch {
         // corrupted cart data, ignore and start fresh
       }
@@ -43,6 +46,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [items, hydrated]);
 
   function addItem(item: Omit<CartItem, "quantity">) {
+    if (isBookingOnly(item.type)) return;
     setItems((prev) => {
       const existing = prev.find((i) => i.id === item.id);
       if (existing) {

@@ -1,9 +1,10 @@
+import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import AddToCartButton from "@/components/AddToCartButton";
+import ProductCard from "@/components/ProductCard";
+import Reveal from "@/components/Reveal";
 import { createClient } from "@/lib/supabase/server";
-import Link from "next/link";
-import { MonitorPlay, PlayCircle, Award, Users, ArrowRight } from "lucide-react";
+import { ArrowRight, Award, MonitorPlay, PlayCircle, Users } from "lucide-react";
 
 export const revalidate = 60;
 
@@ -11,15 +12,15 @@ export default async function CoursesPage() {
   const supabase = await createClient();
   const { data: courses } = await supabase
     .from("products")
-    .select("id, title, description, price,thumbnail_url")
+    .select("id, type, title, description, price, thumbnail_url")
     .eq("type", "course")
     .eq("status", "published")
     .order("created_at", { ascending: true });
 
   const perks = [
-    { icon: PlayCircle, title: "Video Lessons", desc: "Learn at your own pace with structured video content." },
-    { icon: Award, title: "Certificates", desc: "Earn a certificate on completion of every course." },
-    { icon: Users, title: "Community", desc: "Join discussions with fellow students." },
+    { icon: PlayCircle, title: "Video lessons", desc: "Learn at your own pace with structured video content." },
+    { icon: Award, title: "Certificates", desc: "Earn a certificate when you finish a course." },
+    { icon: Users, title: "Track your progress", desc: "Pick up exactly where you stopped, on any device." },
   ];
 
   return (
@@ -45,32 +46,14 @@ export default async function CoursesPage() {
 
       <section className="relative bg-white">
         <div className="relative z-10 max-w-7xl mx-auto px-6 py-20">
-          <h2 className="font-display text-3xl font-semibold text-navy mb-10 text-center">All Courses</h2>
+          <h2 className="font-display text-3xl font-semibold text-navy mb-10 text-center">All courses</h2>
 
           {courses && courses.length > 0 ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {courses.map((c) => (
-                <div key={c.id} className="rounded-2xl bg-white border border-line p-6 shadow-sm hover:border-gold/50 hover:shadow-md transition-all flex flex-col">
-                  {c.thumbnail_url ? (
-                    <img
-                      src={c.thumbnail_url}
-                      alt={c.title}
-                      className="w-full h-36 object-cover rounded-xl mb-4"
-                    />
-                  ) : (
-                    <div className="w-full h-36 rounded-xl bg-cream flex items-center justify-center mb-4">
-                      <MonitorPlay size={28} className="text-slate/40" />
-                    </div>
-                  )}
-                  <h3 className="font-display font-semibold text-navy mb-2">{c.title}</h3>
-                  <p className="text-sm text-slate flex-1">{c.description}</p>
-                  <div className="flex items-center justify-between mt-6">
-                    <span className="font-display text-lg font-semibold text-gold">
-                      ₦{Number(c.price).toLocaleString()}
-                    </span>
-                    <AddToCartButton id={c.id} title={c.title} price={Number(c.price)} type="course" />
-                  </div>
-                </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
+              {courses.map((c, i) => (
+                <Reveal key={c.id} delay={i * 60}>
+                  <ProductCard product={c} />
+                </Reveal>
               ))}
             </div>
           ) : (
@@ -83,7 +66,7 @@ export default async function CoursesPage() {
 
       <section className="relative bg-navy border-y border-gold/10">
         <div className="relative z-10 max-w-7xl mx-auto px-6 py-20">
-          <h2 className="font-display text-3xl font-semibold text-cream mb-12 text-center">What You Get</h2>
+          <h2 className="font-display text-3xl font-semibold text-cream mb-12 text-center">What you get</h2>
           <div className="grid sm:grid-cols-3 gap-8">
             {perks.map((p) => (
               <div key={p.title} className="text-center">
@@ -100,12 +83,15 @@ export default async function CoursesPage() {
 
       <section className="relative bg-white">
         <div className="relative z-10 max-w-7xl mx-auto px-6 py-24">
-          <div className="rounded-3xl bg-navy p-12 text-center">
+          <div className="rounded-3xl bg-navy p-10 sm:p-12 text-center">
             <h2 className="font-display text-3xl font-semibold mb-3 text-cream">Start learning today</h2>
             <p className="text-cream/70 mb-8 max-w-lg mx-auto">
               Add a course to your cart and get lifetime access once you check out.
             </p>
-            <Link href="/shop" className="rounded-full bg-gold px-7 py-3 text-sm font-semibold text-navy inline-flex items-center gap-2 hover:bg-gold/90 transition-colors">
+            <Link
+              href="/shop"
+              className="rounded-full bg-gold px-7 py-3 text-sm font-semibold text-navy inline-flex items-center gap-2 hover:bg-gold/90 transition-colors"
+            >
               Browse Shop <ArrowRight size={16} />
             </Link>
           </div>

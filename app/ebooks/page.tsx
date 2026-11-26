@@ -1,9 +1,10 @@
+import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import AddToCartButton from "@/components/AddToCartButton";
+import ProductCard from "@/components/ProductCard";
+import Reveal from "@/components/Reveal";
 import { createClient } from "@/lib/supabase/server";
-import Link from "next/link";
-import { BookOpen, Download, ShieldCheck, ArrowRight } from "lucide-react";
+import { BookOpen, Download, ShieldCheck } from "lucide-react";
 
 export const revalidate = 60;
 
@@ -11,7 +12,7 @@ export default async function EbooksPage() {
   const supabase = await createClient();
   const { data: ebooks } = await supabase
     .from("products")
-    .select("id, title, description, price, thumbnail_url")
+    .select("id, type, title, description, price, thumbnail_url")
     .eq("type", "ebook")
     .eq("status", "published")
     .order("created_at", { ascending: true });
@@ -29,7 +30,7 @@ export default async function EbooksPage() {
             <BookOpen size={14} /> EBOOK MARKETPLACE
           </span>
           <h1 className="font-display text-4xl md:text-5xl font-semibold mt-5 text-cream max-w-2xl">
-            Guides, templates, and resources — instant access.
+            Guides, templates, and resources, with instant access.
           </h1>
           <p className="text-cream/70 text-lg mt-4 max-w-xl">
             Purchase once, download securely from your dashboard anytime.
@@ -40,28 +41,11 @@ export default async function EbooksPage() {
       <section className="relative bg-white">
         <div className="relative z-10 max-w-7xl mx-auto px-6 py-20">
           {ebooks && ebooks.length > 0 ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {ebooks.map((e) => (
-                <div key={e.id} className="rounded-2xl bg-white border border-line p-6 shadow-sm hover:border-gold/50 hover:shadow-md transition-all flex flex-col">
-                  <div className="w-10 h-10 rounded-full bg-gold/10 text-gold flex items-center justify-center mb-4">
-                    <BookOpen size={18} />
-                  </div>
-                  {e.thumbnail_url ? (
-                    <img src={e.thumbnail_url} alt={e.title} className="w-full h-36 object-cover rounded-xl mb-4" />
-                  ) : (
-                    <div className="w-full h-36 rounded-xl bg-cream flex items-center justify-center mb-4">
-                      <BookOpen size={28} className="text-slate/40" />
-                    </div>
-                  )}
-               <h3 className="font-display font-semibold text-navy mb-2">{e.title}</h3>
-                  <p className="text-sm text-slate flex-1">{e.description}</p>
-                  <div className="flex items-center justify-between mt-6">
-                    <span className="font-display text-lg font-semibold text-gold">
-                      ₦{Number(e.price).toLocaleString()}
-                    </span>
-                    <AddToCartButton id={e.id} title={e.title} price={Number(e.price)} type="ebook" />
-                  </div>
-                </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
+              {ebooks.map((e, i) => (
+                <Reveal key={e.id} delay={i * 60}>
+                  <ProductCard product={e} />
+                </Reveal>
               ))}
             </div>
           ) : (
@@ -78,7 +62,8 @@ export default async function EbooksPage() {
             <ShieldCheck size={14} /> SECURE, INSTANT ACCESS
           </div>
           <p className="text-cream/70 max-w-xl mx-auto flex items-center justify-center gap-2">
-            <Download size={16} className="text-gold" /> Every purchase unlocks a download from your dashboard — no waiting, no shipping.
+            <Download size={16} className="text-gold flex-shrink-0" /> Every purchase unlocks a download from your
+            dashboard. No waiting, no shipping.
           </p>
         </div>
       </section>

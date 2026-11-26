@@ -10,11 +10,13 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
   const supabase = await createClient();
   const { data: product } = await supabase
     .from("products")
-    .select("id, type, title, description, price, status, thumbnail_url, file_url")
+    .select("id, type, title, description, price, status, thumbnail_url, file_url, metadata")
     .eq("id", id)
     .single();
 
   if (!product) redirect("/admin/products");
+
+  const formTemplate = ((product.metadata as any)?.form_template as string | undefined) ?? null;
 
   return (
     <div>
@@ -22,7 +24,7 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
         <ArrowLeft size={14} /> Back to Products
       </Link>
       <h1 className="font-display text-2xl font-semibold text-navy mb-8">Edit Product</h1>
-      <EditProductForm product={product} />
+      <EditProductForm product={product} formTemplate={formTemplate} />
     </div>
   );
 }

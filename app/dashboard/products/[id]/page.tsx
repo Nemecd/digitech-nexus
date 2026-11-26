@@ -39,21 +39,24 @@ export default async function OwnedProductPage({
       </Link>
 
       <div className="rounded-2xl bg-white border border-line p-6 md:p-8">
-        <div className="flex flex-col sm:flex-row gap-6">
-          {product.thumbnail_url ? (
-            <img src={product.thumbnail_url} alt={product.title} className="w-full sm:w-40 h-40 rounded-xl object-cover flex-shrink-0" />
-          ) : (
-            <div className="w-full sm:w-40 h-40 rounded-xl bg-cream flex items-center justify-center flex-shrink-0">
-              <BookOpen size={36} className="text-slate/30" />
-            </div>
-          )}
+        <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-start">
+          <div className="relative w-32 sm:w-36 aspect-[2/3] flex-shrink-0 overflow-hidden rounded-md bg-navy shadow-xl ring-1 ring-black/10">
+            {product.thumbnail_url ? (
+              <img src={product.thumbnail_url} alt={product.title} className="absolute inset-0 h-full w-full object-cover" />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <BookOpen size={32} className="text-gold/70" />
+              </div>
+            )}
+            <div className="pointer-events-none absolute inset-y-0 left-0 w-2 bg-gradient-to-r from-black/25 to-transparent" />
+          </div>
 
-          <div>
+          <div className="text-center sm:text-left">
             <p className="inline-flex items-center gap-1.5 text-xs font-semibold text-gold mb-2">
               <CheckCircle2 size={14} /> Purchased
             </p>
             <h1 className="font-display text-2xl font-semibold text-navy mb-2">{product.title}</h1>
-            <p className="text-sm text-slate leading-relaxed">{product.description}</p>
+            <p className="text-sm text-slate leading-relaxed whitespace-pre-wrap">{product.description}</p>
           </div>
         </div>
 

@@ -7,7 +7,7 @@ import { revalidatePath } from "next/cache";
 export async function submitResubmission(data: {
   serviceRequestId: string;
   userProductId: string;
-  orderId: string;   // kept so the form needs no change; the real value is read from the database
+  orderId: string | null; // kept so the form needs no change; the real value is read from the database
   productId: string; // same
   notes: string;
   documentPaths: string[];
@@ -24,16 +24,22 @@ export async function submitResubmission(data: {
     .single();
   if (!owned || owned.status !== "awaiting_docs") throw new Error("Nothing to resubmit for this request");
 
-  // The request must belong to this purchase and this customer
+  // The request must belong to this booking and this customer
   const { data: request } = await supabase
     .from("service_requests")
-    .select("id")
+    .select("id, user_product_id, order_id, product_id")
     .eq("id", data.serviceRequestId)
     .eq("user_id", user.id)
-    .eq("order_id", owned.order_id)
-    .eq("product_id", owned.product_id)
-    .single();
-  if (!request) throw new Error("Request not found");
+    .maybeSingle();
+
+  const linked =
+    !!request &&
+    (request.user_product_id === owned.id ||
+      (!request.user_product_id &&
+        !!request.order_id &&
+        request.order_id === owned.order_id &&
+        request.product_id === owned.product_id));
+  if (!request || !linked) throw new Error("Request not found");
 
   if (!data.documentPaths.every((p) => p.startsWith(`${user.id}/`))) {
     throw new Error("Invalid document upload");

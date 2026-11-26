@@ -18,16 +18,29 @@ export default async function ResubmitPage({ params }: { params: Promise<{ id: s
 
   if (!userProduct) redirect("/dashboard/products");
 
-  const { data: serviceRequest } = await supabase
+  const product = userProduct.products as any;
+
+  // New requests are linked straight to their booking. Older paid requests
+  // are found through their order instead.
+  const { data: linked } = await supabase
     .from("service_requests")
     .select("id, admin_request_note")
-    .eq("order_id", userProduct.order_id)
-    .eq("product_id", (userProduct.products as any).id)
-    .single();
+    .eq("user_product_id", userProduct.id)
+    .limit(1);
+
+  let serviceRequest = linked?.[0];
+
+  if (!serviceRequest && userProduct.order_id) {
+    const { data: legacy } = await supabase
+      .from("service_requests")
+      .select("id, admin_request_note")
+      .eq("order_id", userProduct.order_id)
+      .eq("product_id", product.id)
+      .limit(1);
+    serviceRequest = legacy?.[0];
+  }
 
   if (!serviceRequest) redirect("/dashboard/products");
-
-  const product = userProduct.products as any;
 
   return (
     <div>

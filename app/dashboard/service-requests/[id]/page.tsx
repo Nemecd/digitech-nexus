@@ -18,6 +18,9 @@ export default async function ServiceRequestPage({ params }: { params: Promise<{
 
   if (!userProduct) redirect("/dashboard/products");
 
+  // The form is only for a request that has not been submitted yet
+  if (userProduct.status !== "pending") redirect("/dashboard/products");
+
   const product = userProduct.products as any;
   const formTemplate = product.metadata?.form_template || null;
 

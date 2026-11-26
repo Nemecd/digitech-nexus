@@ -1,9 +1,11 @@
+import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import AddToCartButton from "@/components/AddToCartButton";
+import ProductCard from "@/components/ProductCard";
+import Reveal from "@/components/Reveal";
 import { createClient } from "@/lib/supabase/server";
-import Link from "next/link";
-import { Fingerprint, FileCheck, UploadCloud, Bell, ArrowRight } from "lucide-react";
+import { whatsappLink } from "@/lib/booking-config";
+import { ArrowRight, Bell, ClipboardList, FileCheck, Fingerprint, MessageCircle, UploadCloud } from "lucide-react";
 
 export const revalidate = 60;
 
@@ -11,82 +13,92 @@ export default async function NinServicesPage() {
   const supabase = await createClient();
   const { data: services } = await supabase
     .from("products")
-    .select("id, title, description, price, thumbnail_url")
+    .select("id, type, title, description, price, thumbnail_url")
     .eq("type", "nin_service")
     .eq("status", "published")
     .order("created_at", { ascending: true });
 
   const steps = [
-    { icon: Fingerprint, title: "Choose a service", desc: "Select the NIN service you need from the list below." },
-    { icon: UploadCloud, title: "Submit details & documents", desc: "Fill the request form and upload any required documents." },
-    { icon: FileCheck, title: "We process your request", desc: "Our team reviews and handles your request securely." },
-    { icon: Bell, title: "Get notified", desc: "Track status and receive updates on your dashboard." },
+    { icon: ClipboardList, title: "Choose a service", desc: "Pick the NIN service you need from the list below." },
+    { icon: UploadCloud, title: "Fill in the form", desc: "Answer a few short questions and upload any documents asked for." },
+    { icon: FileCheck, title: "We handle it", desc: "Our team processes your request and keeps you updated." },
+    { icon: Bell, title: "Get notified", desc: "Follow the progress from your dashboard, or message us any time." },
   ];
+
+  const generalChat = whatsappLink("Hello Digitech Nexus, I need help with a NIN service.");
 
   return (
     <>
       <Navbar />
 
-      {/* Page hero */}
       <section className="relative bg-navy">
         <div className="relative z-10 max-w-7xl mx-auto px-6 pt-16 pb-14">
           <p className="text-xs text-cream/60 mb-3">
             <Link href="/" className="hover:text-gold transition-colors">Home</Link> / NIN Services
           </p>
           <span className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold/10 px-4 py-1.5 text-xs font-semibold text-gold">
-            <Fingerprint size={14} /> NIN SERVICES
+            <Fingerprint size={14} /> NIN SERVICES · NO ONLINE PAYMENT NEEDED
           </span>
           <h1 className="font-display text-4xl md:text-5xl font-semibold mt-5 text-cream max-w-2xl">
-            NIN enrolment & related services, handled right.
+            Book your NIN service in minutes.
           </h1>
           <p className="text-cream/70 text-lg mt-4 max-w-xl">
-            From new enrolment to modification, retrieval, and validation — we handle the process so you don&apos;t have to navigate it alone.
+            Pick a service, fill in the short form, and our team takes it from there. Prefer to talk it through? Chat
+            with us on WhatsApp.
           </p>
+          <div className="flex flex-wrap gap-4 mt-8">
+            <a
+              href="#services"
+              className="rounded-full bg-gold px-6 py-3 text-sm font-semibold text-navy hover:bg-gold/90 transition-colors inline-flex items-center gap-2"
+            >
+              See services <ArrowRight size={16} />
+            </a>
+            <a
+              href={generalChat}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-full border border-cream/25 px-6 py-3 text-sm font-semibold text-cream hover:border-gold hover:text-gold transition-colors inline-flex items-center gap-2"
+            >
+              <MessageCircle size={16} /> Chat on WhatsApp
+            </a>
+          </div>
         </div>
       </section>
 
-      {/* Services list */}
-      <section className="relative bg-white">
+      <section id="services" className="relative bg-white scroll-mt-20">
         <div className="relative z-10 max-w-7xl mx-auto px-6 py-20">
-          <h2 className="font-display text-3xl font-semibold text-navy mb-10 text-center">Available Services</h2>
+          <h2 className="font-display text-3xl font-semibold text-navy mb-3 text-center">Available services</h2>
+          <p className="text-sm text-slate text-center mb-10 max-w-lg mx-auto">
+            You&apos;ll be asked to log in or create an account first, so you can track your request from your dashboard.
+          </p>
 
           {services && services.length > 0 ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {services.map((s) => (
-                <div key={s.id} className="rounded-2xl bg-white border border-line p-6 shadow-sm hover:border-gold/50 hover:shadow-md transition-all flex flex-col">
-                  {s.thumbnail_url ? (
-                    <img src={s.thumbnail_url} alt={s.title} className="w-full h-36 object-cover rounded-xl mb-4" />
-                  ) : (
-                    <div className="w-full h-36 rounded-xl bg-cream flex items-center justify-center mb-4">
-                      <Fingerprint size={28} className="text-slate/40" />
-                    </div>
-                  )}
-                  <h3 className="font-display font-semibold text-navy mb-2">{s.title}</h3>
-                  <p className="text-sm text-slate flex-1">{s.description}</p>
-                  <div className="flex items-center justify-between mt-6">
-                    <span className="font-display text-lg font-semibold text-gold">
-                      ₦{Number(s.price).toLocaleString()}
-                    </span>
-                    <AddToCartButton id={s.id} title={s.title} price={Number(s.price)} type="nin_service" />
-                  </div>
-                </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
+              {services.map((s, i) => (
+                <Reveal key={s.id} delay={i * 60}>
+                  <ProductCard product={s} returnTo="/services/nin" />
+                </Reveal>
               ))}
             </div>
           ) : (
             <div className="text-center rounded-2xl border border-line bg-white p-12 max-w-lg mx-auto">
-              <p className="text-slate">Our NIN service list is being updated. Reach out and we&apos;ll get you sorted directly.</p>
-              <Link href="/contact" className="text-gold hover:underline text-sm font-semibold mt-4 inline-block">
-                Contact us →
-              </Link>
+              <p className="text-slate">Our NIN service list is being updated. Message us and we&apos;ll sort you out directly.</p>
+              <a
+                href={generalChat}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gold hover:underline text-sm font-semibold mt-4 inline-block"
+              >
+                Chat on WhatsApp →
+              </a>
             </div>
           )}
         </div>
       </section>
 
-      {/* How it works */}
       <section className="relative bg-navy border-y border-gold/10">
         <div className="relative z-10 max-w-7xl mx-auto px-6 py-20">
-          <h2 className="font-display text-3xl font-semibold text-cream mb-12 text-center">How It Works</h2>
+          <h2 className="font-display text-3xl font-semibold text-cream mb-12 text-center">How it works</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {steps.map((step, i) => (
               <div key={step.title} className="text-center">
@@ -102,17 +114,21 @@ export default async function NinServicesPage() {
         </div>
       </section>
 
-      {/* CTA */}
       <section className="relative bg-white">
         <div className="relative z-10 max-w-7xl mx-auto px-6 py-24">
-          <div className="rounded-3xl bg-navy p-12 text-center">
-            <h2 className="font-display text-3xl font-semibold mb-3 text-cream">Ready to get your NIN sorted?</h2>
+          <div className="rounded-3xl bg-navy p-10 sm:p-12 text-center">
+            <h2 className="font-display text-3xl font-semibold mb-3 text-cream">Not sure which service you need?</h2>
             <p className="text-cream/70 mb-8 max-w-lg mx-auto">
-              Create an account to request a service, upload documents, and track your status — all in one dashboard.
+              Tell us what you&apos;re trying to do on WhatsApp and we&apos;ll point you to the right one.
             </p>
-            <Link href="/register" className="rounded-full bg-gold px-7 py-3 text-sm font-semibold text-navy inline-flex items-center gap-2 hover:bg-gold/90 transition-colors">
-              Create Account <ArrowRight size={16} />
-            </Link>
+            <a
+              href={generalChat}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-full bg-gold px-7 py-3 text-sm font-semibold text-navy inline-flex items-center gap-2 hover:bg-gold/90 transition-colors"
+            >
+              <MessageCircle size={16} /> Chat on WhatsApp
+            </a>
           </div>
         </div>
       </section>

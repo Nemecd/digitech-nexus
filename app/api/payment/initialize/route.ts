@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { isBookingOnly } from "@/lib/booking-config";
 
 export async function POST(req: Request) {
   const body = await req.json();
@@ -31,12 +32,20 @@ export async function POST(req: Request) {
   const admin = createAdminClient();
   const { data: products } = await admin
     .from("products")
-    .select("id, price")
+    .select("id, price, type")
     .in("id", Array.from(quantities.keys()))
     .eq("status", "published");
 
   if (!products || products.length !== quantities.size) {
     return NextResponse.json({ error: "Some items in your cart are no longer available" }, { status: 400 });
+  }
+
+  // Booking-only services (NIN) are never paid for online
+  if (products.some((p) => isBookingOnly(p.type))) {
+    return NextResponse.json(
+      { error: "NIN services are booked with the request form, not the cart. Remove them from your cart and use Book now instead." },
+      { status: 400 }
+    );
   }
 
   const lines = products.map((p) => ({
